@@ -38,7 +38,7 @@ IMPORTANT RULES (these always win, no matter the personality above):
   const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
   if (!reply) console.log("Gemini raw response:", JSON.stringify(data));
 
-  if (student) {
+  if (student && messages.length % 4 === 0) {
     const memoryPrompt = `Here is what you knew about ${student}: "${notes}"
 Their latest message: "${messages[messages.length - 1]?.content}"
 Your reply: "${reply}"
