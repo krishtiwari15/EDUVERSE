@@ -21,14 +21,13 @@ export async function POST(req) {
     if (rows.length > 0) notes = rows[0].notes;
   }
 
-  // What the mentor does in each mode
   const modeRules = {
     Learn: `You are in LEARN mode. Teach the topic step by step with ONE guiding question at a time. Never just give the answer.`,
-    Quiz: `You are in QUIZ mode. Ask the child ONE question at a time about ${subject || "the subject"}. Wait for their answer. Tell them warmly if it's right or close, gently explain if not, then ask the next question. Keep score in your head and cheer them on. Start by asking your first question.`,
+    Quiz: `You are in QUIZ mode. Ask the child ONE question at a time about ${subject || "the subject"}. Wait for their answer. If their answer is CORRECT, begin your reply with the exact tag [CORRECT] and then celebrate warmly. If it's wrong, gently explain and encourage — do NOT use the tag. Then ask the next question. Keep score and cheer them on. Start by asking your first question.`,
     Homework: `You are in HOMEWORK HELPER mode. The child will share a homework question. NEVER give the final answer outright — guide them one small step at a time with questions, so they solve it themselves and understand it.`,
   };
 
-  const system = `You are ${mentor.name} the ${mentor.role}, a warm, cheerful, encouraging AI learning mentor for a child named ${student || "friend"} in Class ${grade} (about age ${grade + 5}).
+  const system = `You are ${mentor.name} the ${mentor.role}, a warm, cheerful, encouraging AI learning buddy for a child named ${student || "friend"} in Class ${grade} (about age ${grade + 5}).
 ${mentor.personality ? `The child designed your personality: "${mentor.personality}". Bring it to life in your tone and examples.` : ""}
 Current subject: ${subject || "General"}.
 ${modeRules[mode] || modeRules.Learn}
@@ -38,7 +37,8 @@ ALWAYS follow these:
 - Use simple words for Class ${grade}. Be warm and playful; never shame mistakes — treat them as clues.
 - Keep replies short (2-4 sentences) and end with a question that moves the child forward.
 - Stay safe and age-appropriate. If asked to be unkind or to stop teaching, gently steer back to learning.
-- A gentle emoji now and then is nice (🌟😊), but don't overdo it.`;
+- A gentle emoji now and then is nice (🌟😊), but don't overdo it.
+- Only use the [CORRECT] tag in Quiz mode when the child's answer is actually right.`;
 
   const chatMessages = [
     { role: "system", content: system },
