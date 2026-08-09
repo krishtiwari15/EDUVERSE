@@ -21,5 +21,12 @@ export async function GET() {
       created_at TIMESTAMP DEFAULT now()
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS progress (
+      student TEXT PRIMARY KEY,
+      stars INTEGER DEFAULT 0,
+      updated_at TIMESTAMP DEFAULT now()
+    )
+  `;
   return Response.json({ ok: true, message: "Tables ready!" });
 }

@@ -21,6 +21,14 @@ const SUBJECTS = ["General", "Math", "Science", "English", "Social Studies", "GK
 const MODES = ["Learn", "Quiz", "Homework"];
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
 
+const BADGES = [
+  { need: 1, emoji: "🌟", name: "First Star" },
+  { need: 5, emoji: "🚀", name: "Rising Star" },
+  { need: 15, emoji: "🪐", name: "Planet Explorer" },
+  { need: 30, emoji: "☄️", name: "Comet" },
+  { need: 50, emoji: "🌌", name: "Galaxy Master" },
+];
+
 function GalaxyBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden -z-0">
@@ -50,6 +58,7 @@ export default function Home() {
   const [mentor, setMentor] = useState(null);
   const [welcomed, setWelcomed] = useState(false);
   const [building, setBuilding] = useState(false);
+  const [showBadges, setShowBadges] = useState(false);
   const [savedMentors, setSavedMentors] = useState([]);
   const [student, setStudent] = useState("");
   const [grade, setGrade] = useState(3);
@@ -59,6 +68,8 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
   const [confetti, setConfetti] = useState(false);
+  const [stars, setStars] = useState(0);
+  const [newBadge, setNewBadge] = useState(null);
   const recognitionRef = useRef(null);
   const wantListeningRef = useRef(false);
   const finalTextRef = useRef("");
@@ -100,11 +111,40 @@ export default function Home() {
     tap: () => tone(660, 0.09, "triangle", 0.12),
     reply: () => { tone(523, 0.12, "sine", 0.14); tone(784, 0.14, "sine", 0.12, 0.08); },
     correct: () => { tone(523, 0.12); tone(659, 0.12, "sine", 0.15, 0.1); tone(988, 0.2, "sine", 0.15, 0.2); },
+    badge: () => { tone(659, 0.15); tone(880, 0.15, "sine", 0.16, 0.12); tone(1319, 0.3, "sine", 0.16, 0.26); },
   };
   function celebrate() {
     sfx.correct();
     setConfetti(true);
     setTimeout(() => setConfetti(false), 2200);
+  }
+
+  // Load a student's stars
+  async function loadStars(nameArg) {
+    const s = (nameArg ?? student).trim();
+    if (!s) return;
+    try {
+      const r = await fetch(`/api/progress?student=${encodeURIComponent(s)}`);
+      const d = await r.json();
+      setStars(d.stars || 0);
+    } catch {}
+  }
+
+  // Add a star and check for a new badge
+  async function addStar() {
+    const s = student.trim();
+    if (!s) { setStars((v) => v + 1); return; }
+    try {
+      const r = await fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ student: s, add: 1 }) });
+      const d = await r.json();
+      const newTotal = d.stars || stars + 1;
+      // did we just cross a badge milestone?
+      const unlocked = BADGES.find((b) => b.need === newTotal);
+      setStars(newTotal);
+      if (unlocked) {
+        setTimeout(() => { setNewBadge(unlocked); sfx.badge(); }, 800);
+      }
+    } catch { setStars((v) => v + 1); }
   }
 
   function pickVoice() {
@@ -224,7 +264,7 @@ export default function Home() {
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
       sfx.reply();
       speak(reply);
-      if (isCorrect) celebrate();
+      if (isCorrect) { celebrate(); addStar(); }
     } catch {
       setMessages((m) => [...m, { role: "assistant", content: "I lost my train of thought. Send that again?" }]);
     } finally { setLoading(false); }
@@ -253,10 +293,12 @@ export default function Home() {
       @keyframes floatCard { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
       @keyframes popperBurst { 0% { transform: translate(0,0) rotate(0deg); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 40vh)) rotate(720deg); opacity: 0; } }
       @keyframes popperShake { 0%,100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-15deg) scale(1.2); } 75% { transform: rotate(15deg) scale(1.2); } }
+      @keyframes badgePop { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
       .pop-in { animation: popIn 0.35s ease-out both; }
       .wiggle-hover:hover { animation: wiggle 0.4s ease-in-out; }
       .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
       .float-card { animation: floatCard 4s ease-in-out infinite; }
+      .badge-pop { animation: badgePop 0.7s cubic-bezier(0.34,1.56,0.64,1) both; }
       h1, h2, .font-title { font-family: var(--font-fredoka), sans-serif; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -287,9 +329,61 @@ export default function Home() {
     </div>
   ) : null;
 
+  // New-badge popup
+  const BadgePopup = () => newBadge ? (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-6" onClick={() => setNewBadge(null)}>
+      <div className="badge-pop bg-white/10 backdrop-blur-xl rounded-[2rem] ring-1 ring-white/30 p-8 text-center max-w-xs">
+        <div className="text-7xl mb-3">{newBadge.emoji}</div>
+        <div className="text-violet-200 text-sm font-bold uppercase tracking-wide">New badge unlocked!</div>
+        <div className="font-title text-2xl font-bold text-white mt-1">{newBadge.name}</div>
+        <button onClick={() => setNewBadge(null)} className="mt-5 px-6 py-2.5 rounded-full font-bold text-violet-900 bg-white active:scale-95 transition">Awesome! 🎉</button>
+      </div>
+    </div>
+  ) : null;
+
+  // Star counter chip (opens badges)
+  const StarChip = () => (
+    <button onClick={() => { sfx.tap(); setShowBadges(true); }} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 ring-1 ring-white/30 text-white text-sm font-bold active:scale-95 transition shrink-0">
+      ⭐ {stars}
+    </button>
+  );
+
   // ---------- Welcome ----------
   if (!welcomed) {
-    return <Welcome onStart={(nm) => { setStudent(nm); loadMentors(nm); setWelcomed(true); }} />;
+    return <Welcome onStart={(nm) => { setStudent(nm); loadMentors(nm); loadStars(nm); setWelcomed(true); }} />;
+  }
+
+  // ---------- Badges screen ----------
+  if (showBadges) {
+    const nextBadge = BADGES.find((b) => stars < b.need);
+    return (
+      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground /><Confetti />
+        <div className="relative z-10 w-full max-w-md pop-in">
+          <button onClick={() => { sfx.tap(); setShowBadges(false); }} className="text-white/80 hover:text-white mb-3 font-semibold">← Back</button>
+          <div className="bg-white/10 backdrop-blur-xl rounded-[1.75rem] p-6 shadow-2xl ring-1 ring-white/20 text-center">
+            <div className="text-5xl mb-1">⭐</div>
+            <div className="font-title text-3xl font-bold text-white">{stars} Stars</div>
+            <p className="text-violet-200 text-sm mt-1">
+              {nextBadge ? `${nextBadge.need - stars} more to unlock ${nextBadge.name} ${nextBadge.emoji}` : "You've earned every badge! 🌌"}
+            </p>
+            <div className="grid grid-cols-5 gap-2 mt-6">
+              {BADGES.map((b) => {
+                const earned = stars >= b.need;
+                return (
+                  <div key={b.name} className="flex flex-col items-center">
+                    <div className={`w-full aspect-square rounded-2xl flex items-center justify-center text-2xl sm:text-3xl transition ${earned ? "bg-white/20 ring-2 ring-white/50" : "bg-white/5 ring-1 ring-white/10 opacity-40 grayscale"}`}>
+                      {earned ? b.emoji : "🔒"}
+                    </div>
+                    <div className={`text-[9px] mt-1 font-semibold leading-tight ${earned ? "text-white" : "text-white/40"}`}>{b.name}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // ---------- Builder screen ----------
@@ -335,8 +429,9 @@ export default function Home() {
   if (!mentor) {
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
-        {styleBlock}<GalaxyBackground /><Confetti />
+        {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
         <div className="relative z-10 w-full max-w-3xl pop-in py-6">
+          <div className="flex justify-end mb-2"><StarChip /></div>
           <div className="text-center">
             <div className="text-4xl sm:text-5xl mb-2 float-card">🌙</div>
             <h1 className="text-3xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight px-2">{student ? `Hi ${student}!` : "Pick your buddy!"}</h1>
@@ -378,14 +473,15 @@ export default function Home() {
   // ---------- Chat screen ----------
   return (
     <div className="relative min-h-screen flex flex-col" style={galaxyBg}>
-      {styleBlock}<GalaxyBackground /><Confetti />
-      <header className="relative z-10 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-white/10 backdrop-blur-xl ring-1 ring-white/20">
-        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setMentor(null); }} className="text-white/70 hover:text-white text-xl w-8 shrink-0">←</button>
+      {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
+      <header className="relative z-10 flex items-center gap-2 px-3 sm:px-4 py-3 bg-white/10 backdrop-blur-xl ring-1 ring-white/20">
+        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setMentor(null); }} className="text-white/70 hover:text-white text-xl w-7 shrink-0">←</button>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ background: mentor.soft }}>{mentor.emoji}</div>
         <div className="leading-tight flex-1 min-w-0">
           <div className="font-title font-bold text-white truncate">{mentor.name}</div>
-          <div className="text-[11px] font-medium truncate" style={{ color: mentor.accent }}>{mentor.role} · Class {grade}{student ? ` · ${student}` : ""}</div>
+          <div className="text-[11px] font-medium truncate" style={{ color: mentor.accent }}>{mentor.role} · Class {grade}</div>
         </div>
+        <StarChip />
         <button onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-9 h-9 rounded-xl ring-1 ring-white/30 bg-white/10 flex items-center justify-center text-base shrink-0">
           {muted ? "🔇" : "🔊"}
         </button>
