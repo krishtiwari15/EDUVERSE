@@ -16,6 +16,8 @@ const COLORS = [
   { accent: "#EC4899", soft: "#FCE7F3" },
   { accent: "#0EA5E9", soft: "#E0F2FE" },
 ];
+const SUBJECTS = ["General", "Math", "Science", "English", "Social Studies", "GK"];
+const MODES = ["Learn", "Quiz", "Homework"];
 
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
 
@@ -25,6 +27,8 @@ export default function Home() {
   const [savedMentors, setSavedMentors] = useState([]);
   const [student, setStudent] = useState("");
   const [grade, setGrade] = useState(3);
+  const [subject, setSubject] = useState("General");
+  const [mode, setMode] = useState("Learn");
   const [muted, setMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
@@ -68,8 +72,7 @@ export default function Home() {
     const u = new SpeechSynthesisUtterance(clean);
     const v = pickVoice();
     if (v) u.voice = v;
-    u.rate = 0.95;
-    u.pitch = 1.1;
+    u.rate = 0.95; u.pitch = 1.1;
     u.onstart = () => setSpeaking(true);
     u.onend = () => setSpeaking(false);
     u.onerror = () => setSpeaking(false);
@@ -84,49 +87,29 @@ export default function Home() {
   function startListening() {
     if (typeof window === "undefined") return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      alert("Voice input isn't supported in this browser. Please use Chrome.");
-      return;
-    }
+    if (!SR) { alert("Voice input isn't supported in this browser. Please use Chrome."); return; }
     stopSpeaking();
     finalTextRef.current = "";
     wantListeningRef.current = true;
-
     const rec = new SR();
-    rec.lang = "en-US";
-    rec.interimResults = true;
-    rec.continuous = true;
-
+    rec.lang = "en-US"; rec.interimResults = true; rec.continuous = true;
     rec.onstart = () => setListening(true);
-
     rec.onerror = (e) => {
       console.log("Mic error:", e.error);
-      if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") {
-        wantListeningRef.current = false;
-        setListening(false);
-        alert("Microphone problem: " + e.error + ".\nClick the 🎤/lock icon in Chrome's address bar and allow the microphone, and check Windows mic settings.");
+      if (["not-allowed", "service-not-allowed", "audio-capture"].includes(e.error)) {
+        wantListeningRef.current = false; setListening(false);
+        alert("Microphone problem: " + e.error + ". Allow the mic in Chrome's address-bar icon and check Windows mic settings.");
       }
     };
-
-    rec.onend = () => {
-      // Chrome ends sessions on its own — restart while the user still wants to talk
-      if (wantListeningRef.current) {
-        try { rec.start(); } catch {}
-      } else {
-        setListening(false);
-      }
-    };
-
+    rec.onend = () => { if (wantListeningRef.current) { try { rec.start(); } catch {} } else setListening(false); };
     rec.onresult = (e) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalTextRef.current += t + " ";
-        else interim += t;
+        if (e.results[i].isFinal) finalTextRef.current += t + " "; else interim += t;
       }
       setInput((finalTextRef.current + interim).trim());
     };
-
     recognitionRef.current = rec;
     try { rec.start(); } catch {}
   }
@@ -178,7 +161,7 @@ export default function Home() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, mentor, grade, student }),
+        body: JSON.stringify({ messages: next, mentor, grade, student, subject, mode }),
       });
       const data = await res.json();
       const reply = data.reply || "Let's try that again — say it once more?";
@@ -190,6 +173,18 @@ export default function Home() {
   }
 
   function send() { sendText(); }
+
+  // Switching mode/subject: tell the mentor and let it kick things off (great for Quiz)
+  function switchContext(newMode, newSubject) {
+    const nm = newMode ?? mode;
+    const ns = newSubject ?? subject;
+    setMode(nm); setSubject(ns);
+    const note =
+      nm === "Quiz" ? `Let's do a ${ns} quiz! Ask me your first question.` :
+      nm === "Homework" ? `I need homework help with ${ns}.` :
+      `Let's learn some ${ns}.`;
+    sendText(note);
+  }
 
   // ---------- Builder screen ----------
   if (building) {
@@ -288,16 +283,35 @@ export default function Home() {
         </button>
       </header>
 
-      <div className="flex flex-col items-center pt-4 pb-2">
-        <div className="w-44 h-44 rounded-full flex items-center justify-center" style={{ background: mentor.soft }}>
-          <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.4 : 0.7} style={{ width: "150px", height: "150px" }} />
+      {/* Mode bar */}
+      <div className="flex justify-center gap-2 pt-3">
+        {MODES.map((md) => (
+          <button key={md} onClick={() => switchContext(md, null)} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${mode === md ? "text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`} style={mode === md ? { background: mentor.accent } : {}}>
+            {md}
+          </button>
+        ))}
+      </div>
+
+      {/* Subject bar */}
+      <div className="flex justify-center gap-2 pt-2 flex-wrap px-4">
+        {SUBJECTS.map((s) => (
+          <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${subject === s ? "bg-slate-800 text-white" : "bg-white text-slate-500 ring-1 ring-slate-200"}`}>
+            {s}
+          </button>
+        ))}
+      </div>
+
+      {/* Animated character */}
+      <div className="flex flex-col items-center pt-2 pb-1">
+        <div className="w-32 h-32 rounded-full flex items-center justify-center" style={{ background: mentor.soft }}>
+          <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.4 : 0.7} style={{ width: "110px", height: "110px" }} />
         </div>
         <div className="mt-1 text-xs font-medium" style={{ color: mentor.accent }}>
           {listening ? "listening…" : speaking ? "speaking…" : "\u00A0"}
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-w-2xl w-full mx-auto">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4 max-w-2xl w-full mx-auto">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed ${m.role === "user" ? "bg-slate-800 text-white rounded-br-md" : "bg-white text-slate-700 ring-1 ring-slate-100 rounded-bl-md"}`}>{m.content}</div>
@@ -314,17 +328,11 @@ export default function Home() {
 
       <div className="px-4 pb-6 pt-2 max-w-2xl w-full mx-auto">
         <div className="flex items-end gap-2 bg-white rounded-2xl ring-1 ring-slate-200 p-2 shadow-sm">
-          <button
-            onClick={listening ? stopListening : startListening}
-            className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse" : "ring-1 ring-slate-200 text-slate-600"}`}
-            title={listening ? "Listening… tap to stop & send" : "Tap and talk"}
-          >
-            🎤
-          </button>
+          <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening… tap mic again when done" : `Ask ${mentor.name} anything…`} className="flex-1 resize-none outline-none bg-transparent px-2 py-2 text-slate-700 max-h-32" />
           <button onClick={send} disabled={loading || !input.trim()} className="px-4 py-2 rounded-xl font-semibold text-white disabled:opacity-40" style={{ background: mentor.accent }}>Send</button>
         </div>
-        <p className="text-center text-[11px] text-slate-400 mt-2">{mentor.name} guides you to the answer — parents & teachers are part of the team.</p>
+        <p className="text-center text-[11px] text-slate-400 mt-2">{mentor.name} guides you — parents & teachers are part of the team.</p>
       </div>
     </div>
   );
