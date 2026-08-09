@@ -84,6 +84,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
 
+  const lastReply = [...messages].reverse().find((m) => m.role === "assistant")?.content || "";
+
   useEffect(() => { scrollRef.current?.scrollTo({ top: 999999, behavior: "smooth" }); }, [messages, loading]);
 
   useEffect(() => {
@@ -217,7 +219,6 @@ export default function Home() {
     } catch {}
   }
 
-  // Pick a buddy → go to home base
   function start(m) {
     sfx.tap();
     setMentor(m);
@@ -225,7 +226,6 @@ export default function Home() {
     setRoom("home");
   }
 
-  // Fly into a room (Learn / Quiz / Homework)
   function enterRoom(nm) {
     sfx.tap();
     setMode(nm);
@@ -295,17 +295,19 @@ export default function Home() {
       @keyframes moonGlow { 0%,100% { box-shadow: 0 0 50px 16px #FDE68A55, inset -10px -8px 0 0 #00000015; } 50% { box-shadow: 0 0 80px 26px #FDE68A77, inset -10px -8px 0 0 #00000015; } }
       @keyframes floatG { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-20px) rotate(6deg); } }
       @keyframes popIn { 0% { opacity: 0; transform: scale(0.85) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-      @keyframes wiggle { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
       @keyframes bounceIn { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
       @keyframes floatCard { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
       @keyframes popperBurst { 0% { transform: translate(0,0) rotate(0deg); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 40vh)) rotate(720deg); opacity: 0; } }
       @keyframes popperShake { 0%,100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-15deg) scale(1.2); } 75% { transform: rotate(15deg) scale(1.2); } }
       @keyframes badgePop { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
+      @keyframes ring { 0% { transform: scale(0.7); opacity: 0.7; } 100% { transform: scale(1.8); opacity: 0; } }
+      @keyframes riseUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-120px) scale(1.1); opacity: 0; } }
+      @keyframes bubbleIn { 0% { transform: scale(0.8) translateY(8px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
       .pop-in { animation: popIn 0.35s ease-out both; }
-      .wiggle-hover:hover { animation: wiggle 0.4s ease-in-out; }
       .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
       .float-card { animation: floatCard 4s ease-in-out infinite; }
       .badge-pop { animation: badgePop 0.7s cubic-bezier(0.34,1.56,0.64,1) both; }
+      .bubble-in { animation: bubbleIn 0.4s ease-out both; }
       h1, h2, .font-title { font-family: var(--font-fredoka), sans-serif; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -493,7 +495,7 @@ export default function Home() {
             <StarChip />
           </div>
           <div className="text-center mb-6 pop-in">
-            <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center shadow-2xl float-card ring-2 ring-white/30" style={{ background: mentor.soft }}>
+            <div className="w-28 h-28 mx-auto rounded-full flex items-center justify-center shadow-2xl float-card ring-2 ring-white/30" style={{ background: mentor.soft }}>
               <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "82%", height: "82%" }} />
             </div>
             <h1 className="font-title text-2xl sm:text-3xl font-bold text-white mt-3">Where to, {student || "explorer"}?</h1>
@@ -516,61 +518,91 @@ export default function Home() {
     );
   }
 
-  // ---------- Chat screen ----------
+  // ---------- IMMERSIVE CHAT ROOM ----------
   return (
-    <div className="relative min-h-screen flex flex-col" style={galaxyBg}>
+    <div className="relative min-h-screen flex flex-col overflow-hidden" style={galaxyBg}>
       {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
-      <header className="relative z-10 flex items-center gap-2 px-3 sm:px-4 py-3 bg-white/10 backdrop-blur-xl ring-1 ring-white/20">
-        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} className="text-white/70 hover:text-white text-xl w-7 shrink-0" title="Home">🏠</button>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ background: mentor.soft }}>{mentor.emoji}</div>
-        <div className="leading-tight flex-1 min-w-0">
-          <div className="font-title font-bold text-white truncate">{mentor.name}</div>
-          <div className="text-[11px] font-medium truncate" style={{ color: mentor.accent }}>{mode} · {subject}</div>
+
+      {/* Top bar */}
+      <header className="relative z-20 flex items-center gap-2 px-3 sm:px-4 py-3">
+        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} className="w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/25 flex items-center justify-center text-lg shrink-0" title="Home">🏠</button>
+        <div className="flex-1 text-center">
+          <div className="font-title font-bold text-white leading-tight">{mentor.name}</div>
+          <div className="text-[11px] font-medium" style={{ color: mentor.accent }}>{mode} · {subject}</div>
         </div>
         <StarChip />
-        <button onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-9 h-9 rounded-xl ring-1 ring-white/30 bg-white/10 flex items-center justify-center text-base shrink-0">
+        <button onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-10 h-10 rounded-xl ring-1 ring-white/25 bg-white/10 flex items-center justify-center text-base shrink-0">
           {muted ? "🔇" : "🔊"}
         </button>
       </header>
 
-      <div className="relative z-10 flex justify-center gap-2 pt-3 px-3">
-        {MODES.map((md) => (
-          <button key={md} onClick={() => switchContext(md, null)} className={`px-4 py-2 rounded-full text-sm font-bold transition active:scale-95 ${mode === md ? "text-violet-900 bg-white shadow-md" : "bg-white/15 text-white ring-1 ring-white/30"}`}>{md}</button>
-        ))}
+      {/* Big buddy center stage */}
+      <div className="relative z-10 flex flex-col items-center pt-2 pb-3">
+        <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+          {/* speaking rings */}
+          {speaking && [0, 1, 2].map((r) => (
+            <div key={r} className="absolute rounded-full" style={{
+              width: 180, height: 180, border: `2px solid ${mentor.accent}`,
+              animation: `ring 1.6s ease-out ${r * 0.5}s infinite`,
+            }} />
+          ))}
+          {/* aura */}
+          <div className="absolute rounded-full" style={{
+            width: 190, height: 190, background: mentor.accent,
+            filter: "blur(38px)", opacity: speaking ? 0.55 : 0.28, transition: "opacity 0.3s",
+          }} />
+          {/* floating stars while speaking */}
+          {speaking && ["⭐", "✨", "💫", "🌟"].map((s, i) => (
+            <div key={i} className="absolute text-xl" style={{
+              left: `${20 + i * 20}%`, bottom: "30%",
+              animation: `riseUp ${1.8 + i * 0.3}s ease-out ${i * 0.4}s infinite`,
+            }}>{s}</div>
+          ))}
+          {/* the buddy */}
+          <div className="relative rounded-full flex items-center justify-center shadow-2xl float-card ring-4 ring-white/30"
+            style={{ width: 200, height: 200, background: `radial-gradient(circle at 40% 35%, #ffffff55, ${mentor.soft})` }}>
+            <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.5 : 0.7} style={{ width: "85%", height: "85%" }} />
+          </div>
+        </div>
+        <div className="mt-1 text-xs font-bold text-violet-200 h-4">{listening ? "🎧 listening…" : speaking ? "💬 speaking…" : ""}</div>
+
+        {/* Speech bubble — buddy's latest words */}
+        {lastReply && (
+          <div key={lastReply} className="bubble-in relative mt-2 mx-4 max-w-md">
+            <div className="bg-white/95 text-slate-700 px-5 py-3 rounded-3xl shadow-xl text-[15px] leading-relaxed text-center">
+              {lastReply}
+            </div>
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45" />
+          </div>
+        )}
+        {loading && (
+          <div className="mt-3 bg-white/95 px-4 py-3 rounded-3xl flex gap-1 shadow-lg">
+            {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ background: mentor.accent, animationDelay: `${d * 0.15}s` }} />)}
+          </div>
+        )}
       </div>
 
-      <div className="relative z-10 flex gap-2 pt-2 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
+      {/* Subject switcher */}
+      <div className="relative z-10 flex gap-2 pt-1 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
         {SUBJECTS.map((s) => (
           <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition ${subject === s ? "bg-white text-violet-800" : "bg-white/10 text-white ring-1 ring-white/25"}`}>{s}</button>
         ))}
       </div>
 
-      <div className="relative z-10 flex flex-col items-center pt-2 pb-1">
-        <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center shadow-2xl float-card ${speaking ? "ring-4 ring-white/70" : "ring-2 ring-white/30"}`} style={{ background: mentor.soft }}>
-          <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.4 : 0.7} style={{ width: "82%", height: "82%" }} />
-        </div>
-        <div className="mt-1 text-xs font-bold text-violet-200 h-4">{listening ? "listening…" : speaking ? "speaking…" : ""}</div>
-      </div>
-
-      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3 max-w-2xl w-full mx-auto">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex pop-in ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[85%] px-4 py-2.5 rounded-3xl text-[15px] leading-relaxed shadow-lg ${m.role === "user" ? "bg-violet-500 text-white rounded-br-md" : "bg-white/95 text-slate-700 rounded-bl-md"}`}>{m.content}</div>
+      {/* your recent messages (small, scrollable) */}
+      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-2 max-w-2xl w-full mx-auto no-scrollbar">
+        {messages.filter((m) => m.role === "user").slice(-3).map((m, i) => (
+          <div key={i} className="flex justify-end pop-in">
+            <div className="max-w-[80%] px-4 py-2 rounded-2xl rounded-br-md text-sm bg-violet-500/90 text-white shadow">{m.content}</div>
           </div>
         ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white/95 px-4 py-3 rounded-3xl rounded-bl-md flex gap-1 shadow-lg">
-              {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ background: mentor.accent, animationDelay: `${d * 0.15}s` }} />)}
-            </div>
-          </div>
-        )}
       </div>
 
-      <div className="relative z-10 px-3 sm:px-4 pb-4 pt-2 max-w-2xl w-full mx-auto">
+      {/* Input */}
+      <div className="relative z-10 px-3 sm:px-4 pb-4 pt-1 max-w-2xl w-full mx-auto">
         <div className="flex items-end gap-2 bg-white/95 rounded-3xl p-2 shadow-2xl">
           <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
-          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening…" : `Ask ${mentor.name}…`} className="flex-1 resize-none outline-none bg-transparent px-2 py-2.5 text-slate-700 text-base max-h-32" />
+          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening…" : `Talk to ${mentor.name}…`} className="flex-1 resize-none outline-none bg-transparent px-2 py-2.5 text-slate-700 text-base max-h-24" />
           <button onClick={() => { sfx.tap(); send(); }} disabled={loading || !input.trim()} className="px-4 py-2.5 rounded-2xl font-bold text-white text-sm disabled:opacity-40 shadow-md active:scale-95 transition shrink-0" style={{ background: mentor.accent }}>Send</button>
         </div>
       </div>
