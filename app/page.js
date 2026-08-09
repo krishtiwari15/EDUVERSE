@@ -1,28 +1,59 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import Welcome from "./welcome";
 
 const MENTORS = {
-  nova: { name: "Nova", role: "Explorer", emoji: "🚀", accent: "#F59E0B", soft: "#FEF3C7", tagline: "Let's go discover how things work." },
-  atlas: { name: "Atlas", role: "Scientist", emoji: "🔬", accent: "#10B981", soft: "#D1FAE5", tagline: "Every question is an experiment." },
-  case: { name: "Case", role: "Detective", emoji: "🔍", accent: "#6366F1", soft: "#E0E7FF", tagline: "Let's find the clues together." },
+  nova: { name: "Luna", role: "Dreamer", emoji: "🌙", accent: "#A78BFA", soft: "#EDE9FE", tagline: "Let's explore the stars and discover cool things!" },
+  atlas: { name: "Ellie", role: "Scientist", emoji: "🦋", accent: "#34D399", soft: "#D1FAE5", tagline: "Every question is a fun little experiment!" },
+  case: { name: "Pip", role: "Stargazer", emoji: "🦉", accent: "#60A5FA", soft: "#DBEAFE", tagline: "Let's solve mysteries under the moonlight!" },
 };
 const GRADES = [1, 2, 3, 4, 5, 6, 7, 8];
-const EMOJIS = ["🦉", "🤖", "🐉", "🦊", "🦄", "🐬", "🐨", "🌟"];
+const EMOJIS = ["🌙", "⭐", "🪐", "🚀", "🦉", "🦋", "🐉", "🦄"];
 const COLORS = [
-  { accent: "#F59E0B", soft: "#FEF3C7" },
-  { accent: "#10B981", soft: "#D1FAE5" },
-  { accent: "#6366F1", soft: "#E0E7FF" },
-  { accent: "#EC4899", soft: "#FCE7F3" },
-  { accent: "#0EA5E9", soft: "#E0F2FE" },
+  { accent: "#A78BFA", soft: "#EDE9FE" },
+  { accent: "#34D399", soft: "#D1FAE5" },
+  { accent: "#60A5FA", soft: "#DBEAFE" },
+  { accent: "#F472B6", soft: "#FCE7F3" },
+  { accent: "#FBBF24", soft: "#FEF3C7" },
 ];
 const SUBJECTS = ["General", "Math", "Science", "English", "Social Studies", "GK"];
 const MODES = ["Learn", "Quiz", "Homework"];
-
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
+
+// Animated galaxy background: stars, shooting stars, glowing moon
+function GalaxyBackground() {
+  return (
+    <div className="pointer-events-none fixed inset-0 overflow-hidden -z-0">
+      {/* Glowing moon */}
+      <div className="absolute rounded-full" style={{ top: "8%", right: "10%", width: 120, height: 120,
+        background: "radial-gradient(circle at 38% 35%, #FEFCE8, #FDE68A 55%, #FBBF24 85%)",
+        boxShadow: "0 0 60px 20px #FDE68A55, inset -12px -10px 0 0 #00000015", animation: "moonGlow 6s ease-in-out infinite" }} />
+      {/* Stars */}
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div key={i} className="absolute rounded-full bg-white"
+          style={{ width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2, top: `${(i * 17) % 100}%`, left: `${(i * 41) % 100}%`,
+            animation: `twinkle3 ${2 + (i % 5)}s ease-in-out ${(i % 10) * 0.3}s infinite` }} />
+      ))}
+      {/* Shooting stars */}
+      {[0, 1, 2].map((n) => (
+        <div key={"sh" + n} className="absolute" style={{ top: `${10 + n * 22}%`, left: "-10%",
+          animation: `shoot ${5 + n}s linear ${n * 3}s infinite` }}>
+          <div style={{ width: 90, height: 2, background: "linear-gradient(90deg, transparent, #fff)", borderRadius: 2, boxShadow: "0 0 8px #fff" }} />
+        </div>
+      ))}
+      {/* Floating galaxy sparkles */}
+      {["✨", "💫", "⭐", "🌟"].map((s, i) => (
+        <div key={"f" + i} className="absolute text-xl" style={{ top: `${(i * 27 + 15) % 90}%`, left: `${(i * 47 + 10) % 90}%`,
+          animation: `floatG ${6 + i}s ease-in-out ${i * 0.5}s infinite`, opacity: 0.7 }}>{s}</div>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
   const [mentor, setMentor] = useState(null);
+  const [welcomed, setWelcomed] = useState(false);
   const [building, setBuilding] = useState(false);
   const [savedMentors, setSavedMentors] = useState([]);
   const [student, setStudent] = useState("");
@@ -56,10 +87,7 @@ export default function Home() {
   function pickVoice() {
     const voices = window.speechSynthesis.getVoices();
     const wanted = ["Google UK English Female", "Microsoft Aria", "Microsoft Jenny", "Samantha", "Google US English", "Microsoft Zira"];
-    for (const name of wanted) {
-      const v = voices.find((vo) => vo.name.includes(name));
-      if (v) return v;
-    }
+    for (const name of wanted) { const v = voices.find((vo) => vo.name.includes(name)); if (v) return v; }
     const fem = voices.find((vo) => /female/i.test(vo.name) && /en/i.test(vo.lang));
     if (fem) return fem;
     return voices.find((vo) => /en/i.test(vo.lang)) || voices[0];
@@ -70,8 +98,7 @@ export default function Home() {
     window.speechSynthesis.cancel();
     const clean = text.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, "");
     const u = new SpeechSynthesisUtterance(clean);
-    const v = pickVoice();
-    if (v) u.voice = v;
+    const v = pickVoice(); if (v) u.voice = v;
     u.rate = 0.95; u.pitch = 1.1;
     u.onstart = () => setSpeaking(true);
     u.onend = () => setSpeaking(false);
@@ -121,10 +148,11 @@ export default function Home() {
     setTimeout(() => sendText(), 300);
   }
 
-  async function loadMentors() {
-    if (!student.trim()) return;
+  async function loadMentors(nameArg) {
+    const s = (nameArg ?? student).trim();
+    if (!s) return;
     try {
-      const r = await fetch(`/api/mentors?student=${encodeURIComponent(student.trim())}`);
+      const r = await fetch(`/api/mentors?student=${encodeURIComponent(s)}`);
       const d = await r.json();
       setSavedMentors(d.mentors || []);
     } catch {}
@@ -141,7 +169,7 @@ export default function Home() {
   async function createMentor() {
     if (!cName.trim()) return;
     const c = COLORS[cColor];
-    const m = { name: cName.trim(), role: "Custom Mentor", emoji: cEmoji, accent: c.accent, soft: c.soft, personality: cPersona.trim(), tagline: "Made just for you." };
+    const m = { name: cName.trim(), role: "Custom Buddy", emoji: cEmoji, accent: c.accent, soft: c.soft, personality: cPersona.trim(), tagline: "Made just for you." };
     if (student.trim()) {
       try {
         await fetch("/api/mentors", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ student: student.trim(), mentor: m }) });
@@ -174,50 +202,72 @@ export default function Home() {
 
   function send() { sendText(); }
 
-  // Switching mode/subject: tell the mentor and let it kick things off (great for Quiz)
   function switchContext(newMode, newSubject) {
     const nm = newMode ?? mode;
     const ns = newSubject ?? subject;
     setMode(nm); setSubject(ns);
-    const note =
-      nm === "Quiz" ? `Let's do a ${ns} quiz! Ask me your first question.` :
-      nm === "Homework" ? `I need homework help with ${ns}.` :
-      `Let's learn some ${ns}.`;
+    const note = nm === "Quiz" ? `Let's do a ${ns} quiz! Ask me your first question.` : nm === "Homework" ? `I need homework help with ${ns}.` : `Let's learn some ${ns}.`;
     sendText(note);
+  }
+
+  const styleBlock = (
+    <style jsx global>{`
+      @keyframes twinkle3 { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+      @keyframes shoot { 0% { transform: translate(0,0) rotate(18deg); opacity: 0; } 8% { opacity: 1; } 22% { opacity: 1; } 40%,100% { transform: translate(130vw, 40vh) rotate(18deg); opacity: 0; } }
+      @keyframes moonGlow { 0%,100% { box-shadow: 0 0 60px 20px #FDE68A55, inset -12px -10px 0 0 #00000015; } 50% { box-shadow: 0 0 90px 30px #FDE68A77, inset -12px -10px 0 0 #00000015; } }
+      @keyframes floatG { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-20px) rotate(6deg); } }
+      @keyframes popIn { 0% { opacity: 0; transform: scale(0.85) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+      @keyframes wiggle { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+      @keyframes bounceIn { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+      @keyframes floatCard { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+      .pop-in { animation: popIn 0.35s ease-out both; }
+      .wiggle-hover:hover { animation: wiggle 0.4s ease-in-out; }
+      .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+      .float-card { animation: floatCard 4s ease-in-out infinite; }
+      h1, h2, .font-title { font-family: var(--font-fredoka), sans-serif; }
+    `}</style>
+  );
+
+  const galaxyBg = { background: "radial-gradient(ellipse at 70% 15%, #3B2E63 0%, #241B47 30%, #150F2E 60%, #0A0718 100%)" };
+
+  // ---------- Welcome ----------
+  if (!welcomed) {
+    return <Welcome onStart={(nm) => { setStudent(nm); loadMentors(nm); setWelcomed(true); }} />;
   }
 
   // ---------- Builder screen ----------
   if (building) {
     const c = COLORS[cColor];
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-white flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
-          <button onClick={() => setBuilding(false)} className="text-slate-400 hover:text-slate-700 mb-4">← Back</button>
-          <div className="bg-white rounded-3xl p-6 shadow-sm ring-1 ring-slate-100">
+      <div className="relative min-h-screen flex items-center justify-center p-6" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground />
+        <div className="relative z-10 w-full max-w-lg pop-in">
+          <button onClick={() => setBuilding(false)} className="text-white/80 hover:text-white mb-4 font-semibold">← Back</button>
+          <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl ring-1 ring-white/20">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ background: c.soft }}>{cEmoji}</div>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl bounce-in" style={{ background: c.soft }}>{cEmoji}</div>
               <div>
-                <div className="font-bold text-slate-800 text-lg">{cName || "Your mentor"}</div>
-                <div className="text-xs font-semibold uppercase" style={{ color: c.accent }}>Custom Mentor</div>
+                <div className="font-title font-bold text-white text-lg">{cName || "Your buddy"}</div>
+                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: c.accent }}>Custom Buddy</div>
               </div>
             </div>
-            <label className="text-sm font-semibold text-slate-600">Name</label>
-            <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="w-full mt-1 mb-4 px-4 py-2 rounded-xl ring-1 ring-slate-200 outline-none text-slate-700" />
-            <label className="text-sm font-semibold text-slate-600">Pick a look</label>
+            <label className="text-sm font-bold text-white/80">Name</label>
+            <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="w-full mt-1 mb-4 px-4 py-2.5 rounded-2xl bg-white/90 outline-none text-slate-700 focus:ring-4 focus:ring-violet-400/50 transition" />
+            <label className="text-sm font-bold text-white/80">Pick a look</label>
             <div className="flex gap-2 mt-1 mb-4 flex-wrap">
               {EMOJIS.map((e) => (
-                <button key={e} onClick={() => setCEmoji(e)} className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center ${cEmoji === e ? "ring-2 ring-slate-800" : "ring-1 ring-slate-200"}`}>{e}</button>
+                <button key={e} onClick={() => setCEmoji(e)} className={`w-11 h-11 rounded-2xl text-xl flex items-center justify-center transition wiggle-hover ${cEmoji === e ? "ring-2 ring-white scale-110 bg-white/20" : "ring-1 ring-white/30"}`}>{e}</button>
               ))}
             </div>
-            <label className="text-sm font-semibold text-slate-600">Pick a color</label>
+            <label className="text-sm font-bold text-white/80">Pick a color</label>
             <div className="flex gap-2 mt-1 mb-4">
               {COLORS.map((col, i) => (
-                <button key={i} onClick={() => setCColor(i)} className={`w-9 h-9 rounded-full ${cColor === i ? "ring-2 ring-offset-2 ring-slate-800" : ""}`} style={{ background: col.accent }} />
+                <button key={i} onClick={() => setCColor(i)} className={`w-10 h-10 rounded-full transition wiggle-hover ${cColor === i ? "ring-2 ring-offset-2 ring-offset-transparent ring-white scale-110" : ""}`} style={{ background: col.accent }} />
               ))}
             </div>
-            <label className="text-sm font-semibold text-slate-600">Describe your mentor's personality</label>
-            <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={3} placeholder="e.g. A funny robot who loves space, tells silly jokes, and cheers me on!" className="w-full mt-1 mb-5 px-4 py-2 rounded-xl ring-1 ring-slate-200 outline-none text-slate-700 resize-none" />
-            <button onClick={createMentor} disabled={!cName.trim()} className="w-full py-3 rounded-xl font-semibold text-white disabled:opacity-40" style={{ background: c.accent }}>Create my mentor ✨</button>
+            <label className="text-sm font-bold text-white/80">Describe your buddy's personality</label>
+            <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={3} placeholder="e.g. A funny robot who loves space, tells silly jokes, and cheers me on!" className="w-full mt-1 mb-5 px-4 py-2.5 rounded-2xl bg-white/90 outline-none text-slate-700 resize-none focus:ring-4 focus:ring-violet-400/50 transition" />
+            <button onClick={createMentor} disabled={!cName.trim()} className="w-full py-3.5 rounded-2xl font-bold text-white disabled:opacity-40 shadow-lg hover:scale-[1.02] active:scale-95 transition" style={{ background: c.accent }}>Create my buddy ✨</button>
           </div>
         </div>
       </div>
@@ -227,40 +277,41 @@ export default function Home() {
   // ---------- Picker screen ----------
   if (!mentor) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-white flex items-center justify-center p-6">
-        <div className="w-full max-w-3xl">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 text-center">Choose your mentor</h1>
-          <p className="text-slate-500 mt-2 text-center">A guide who helps you figure things out yourself.</p>
+      <div className="relative min-h-screen flex items-center justify-center p-6" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground />
+        <div className="relative z-10 w-full max-w-3xl pop-in">
+          <div className="text-center">
+            <div className="text-5xl mb-2 float-card">🌙</div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight">{student ? `Hi ${student}! Pick your buddy` : "Pick your buddy!"}</h1>
+            <p className="text-violet-200 mt-2 font-medium">A friend who helps you explore and learn under the stars.</p>
+          </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            {Object.entries(MENTORS).map(([key, m]) => (
-              <button key={key} onClick={() => start(m)} className="text-left bg-white rounded-3xl p-5 shadow-sm ring-1 ring-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-4" style={{ background: m.soft }}>{m.emoji}</div>
-                <div className="font-bold text-slate-800 text-lg">{m.name}</div>
-                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: m.accent }}>{m.role}</div>
-                <p className="text-sm text-slate-500 mt-2">{m.tagline}</p>
+            {Object.entries(MENTORS).map(([key, m], idx) => (
+              <button key={key} onClick={() => start(m)} className="bounce-in float-card text-left bg-white/10 backdrop-blur-xl rounded-[1.6rem] p-5 shadow-xl ring-1 ring-white/20 hover:ring-white/50 hover:-translate-y-2 transition-all" style={{ animationDelay: `${idx * 0.08}s` }}>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-4 wiggle-hover" style={{ background: m.soft }}>{m.emoji}</div>
+                <div className="font-title font-bold text-white text-lg">{m.name}</div>
+                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>{m.role}</div>
+                <p className="text-sm text-violet-100/80 mt-2">{m.tagline}</p>
               </button>
             ))}
-            <button onClick={() => setBuilding(true)} className="flex flex-col items-center justify-center bg-white/60 border-2 border-dashed border-slate-300 rounded-3xl p-5 hover:bg-white hover:border-slate-400 transition-all">
-              <div className="text-4xl mb-2">✨</div>
-              <div className="font-bold text-slate-700">Create your own</div>
-              <p className="text-xs text-slate-500 mt-1 text-center">Make a mentor that's totally yours</p>
+            <button onClick={() => setBuilding(true)} className="bounce-in flex flex-col items-center justify-center bg-white/5 border-2 border-dashed border-white/40 rounded-[1.6rem] p-5 hover:bg-white/15 hover:-translate-y-2 transition-all" style={{ animationDelay: "0.24s" }}>
+              <div className="text-4xl mb-2 float-card">✨</div>
+              <div className="font-title font-bold text-white">Create your own</div>
+              <p className="text-xs text-violet-200 mt-1 text-center">Make a buddy that's totally yours</p>
             </button>
             {savedMentors.map((m, i) => (
-              <button key={"saved" + i} onClick={() => start(m)} className="text-left bg-white rounded-3xl p-5 shadow-sm ring-1 ring-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-4" style={{ background: m.soft }}>{m.emoji}</div>
-                <div className="font-bold text-slate-800 text-lg">{m.name}</div>
-                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: m.accent }}>Your mentor</div>
-                <p className="text-sm text-slate-500 mt-2">{m.personality?.slice(0, 40) || "Made just for you."}</p>
+              <button key={"saved" + i} onClick={() => start(m)} className="bounce-in float-card text-left bg-white/10 backdrop-blur-xl rounded-[1.6rem] p-5 shadow-xl ring-1 ring-white/20 hover:ring-white/50 hover:-translate-y-2 transition-all">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-4 wiggle-hover" style={{ background: m.soft }}>{m.emoji}</div>
+                <div className="font-title font-bold text-white text-lg">{m.name}</div>
+                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>Your buddy</div>
+                <p className="text-sm text-violet-100/80 mt-2">{m.personality?.slice(0, 40) || "Made just for you."}</p>
               </button>
             ))}
           </div>
-          <div className="mt-8 flex justify-center">
-            <input value={student} onChange={(e) => setStudent(e.target.value)} onBlur={loadMentors} placeholder="What's your name?" className="px-4 py-2 rounded-full ring-1 ring-slate-200 outline-none text-slate-700 text-center" />
-          </div>
-          <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
-            <span className="text-sm text-slate-500 mr-1">I'm in Class</span>
+          <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-sm text-violet-200 mr-1 font-medium">I'm in Class</span>
             {GRADES.map((g) => (
-              <button key={g} onClick={() => setGrade(g)} className={`w-9 h-9 rounded-full text-sm font-semibold ${grade === g ? "bg-slate-800 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}>{g}</button>
+              <button key={g} onClick={() => setGrade(g)} className={`w-9 h-9 rounded-full text-sm font-bold transition wiggle-hover ${grade === g ? "bg-white text-violet-700 scale-110" : "bg-white/15 text-white ring-1 ring-white/30"}`}>{g}</button>
             ))}
           </div>
         </div>
@@ -270,69 +321,61 @@ export default function Home() {
 
   // ---------- Chat screen ----------
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white flex flex-col">
-      <header className="flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur ring-1 ring-slate-100">
-        <button onClick={() => { stopSpeaking(); stopListening(); setMentor(null); }} className="text-slate-400 hover:text-slate-700">←</button>
+    <div className="relative min-h-screen flex flex-col" style={galaxyBg}>
+      {styleBlock}<GalaxyBackground />
+      <header className="relative z-10 flex items-center gap-3 px-4 py-3 bg-white/10 backdrop-blur-xl ring-1 ring-white/20">
+        <button onClick={() => { stopSpeaking(); stopListening(); setMentor(null); }} className="text-white/70 hover:text-white text-lg">←</button>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: mentor.soft }}>{mentor.emoji}</div>
         <div className="leading-tight flex-1">
-          <div className="font-bold text-slate-800">{mentor.name}</div>
-          <div className="text-xs" style={{ color: mentor.accent }}>{mentor.role} · Class {grade}{student ? ` · ${student}` : ""}</div>
+          <div className="font-title font-bold text-white">{mentor.name}</div>
+          <div className="text-xs font-medium" style={{ color: mentor.accent }}>{mentor.role} · Class {grade}{student ? ` · ${student}` : ""}</div>
         </div>
-        <button onClick={() => { setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-10 h-10 rounded-xl ring-1 ring-slate-200 flex items-center justify-center text-lg" title={muted ? "Turn voice on" : "Turn voice off"}>
+        <button onClick={() => { setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-10 h-10 rounded-xl ring-1 ring-white/30 bg-white/10 flex items-center justify-center text-lg wiggle-hover" title={muted ? "Turn voice on" : "Turn voice off"}>
           {muted ? "🔇" : "🔊"}
         </button>
       </header>
 
-      {/* Mode bar */}
-      <div className="flex justify-center gap-2 pt-3">
+      <div className="relative z-10 flex justify-center gap-2 pt-3">
         {MODES.map((md) => (
-          <button key={md} onClick={() => switchContext(md, null)} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${mode === md ? "text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`} style={mode === md ? { background: mentor.accent } : {}}>
-            {md}
-          </button>
+          <button key={md} onClick={() => switchContext(md, null)} className={`px-4 py-1.5 rounded-full text-sm font-bold transition wiggle-hover ${mode === md ? "text-violet-900 bg-white scale-105 shadow-md" : "bg-white/15 text-white ring-1 ring-white/30"}`}>{md}</button>
         ))}
       </div>
 
-      {/* Subject bar */}
-      <div className="flex justify-center gap-2 pt-2 flex-wrap px-4">
+      <div className="relative z-10 flex justify-center gap-2 pt-2 flex-wrap px-4">
         {SUBJECTS.map((s) => (
-          <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${subject === s ? "bg-slate-800 text-white" : "bg-white text-slate-500 ring-1 ring-slate-200"}`}>
-            {s}
-          </button>
+          <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1 rounded-full text-xs font-semibold transition ${subject === s ? "bg-white text-violet-800" : "bg-white/10 text-white ring-1 ring-white/25"}`}>{s}</button>
         ))}
       </div>
 
-      {/* Animated character */}
-      <div className="flex flex-col items-center pt-2 pb-1">
-        <div className="w-32 h-32 rounded-full flex items-center justify-center" style={{ background: mentor.soft }}>
+      <div className="relative z-10 flex flex-col items-center pt-2 pb-1">
+        <div className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl float-card ${speaking ? "ring-4 ring-white/70" : "ring-2 ring-white/30"}`} style={{ background: mentor.soft }}>
           <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.4 : 0.7} style={{ width: "110px", height: "110px" }} />
         </div>
-        <div className="mt-1 text-xs font-medium" style={{ color: mentor.accent }}>
-          {listening ? "listening…" : speaking ? "speaking…" : "\u00A0"}
-        </div>
+        <div className="mt-1 text-xs font-bold text-violet-200">{listening ? "listening…" : speaking ? "speaking…" : "\u00A0"}</div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4 max-w-2xl w-full mx-auto">
+      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-4 max-w-2xl w-full mx-auto">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed ${m.role === "user" ? "bg-slate-800 text-white rounded-br-md" : "bg-white text-slate-700 ring-1 ring-slate-100 rounded-bl-md"}`}>{m.content}</div>
+          <div key={i} className={`flex pop-in ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-[80%] px-4 py-3 rounded-3xl text-[15px] leading-relaxed shadow-lg ${m.role === "user" ? "bg-violet-500 text-white rounded-br-lg" : "bg-white/95 text-slate-700 rounded-bl-lg"}`}>{m.content}</div>
           </div>
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white ring-1 ring-slate-100 px-4 py-3 rounded-2xl rounded-bl-md flex gap-1">
+            <div className="bg-white/95 px-4 py-3 rounded-3xl rounded-bl-lg flex gap-1 shadow-lg">
               {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ background: mentor.accent, animationDelay: `${d * 0.15}s` }} />)}
             </div>
           </div>
         )}
       </div>
 
-      <div className="px-4 pb-6 pt-2 max-w-2xl w-full mx-auto">
-        <div className="flex items-end gap-2 bg-white rounded-2xl ring-1 ring-slate-200 p-2 shadow-sm">
-          <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
+      <div className="relative z-10 px-4 pb-6 pt-2 max-w-2xl w-full mx-auto">
+        <div className="flex items-end gap-2 bg-white/95 rounded-3xl p-2 shadow-2xl">
+          <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600 wiggle-hover"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening… tap mic again when done" : `Ask ${mentor.name} anything…`} className="flex-1 resize-none outline-none bg-transparent px-2 py-2 text-slate-700 max-h-32" />
-          <button onClick={send} disabled={loading || !input.trim()} className="px-4 py-2 rounded-xl font-semibold text-white disabled:opacity-40" style={{ background: mentor.accent }}>Send</button>
+          <button onClick={send} disabled={loading || !input.trim()} className="px-5 py-2.5 rounded-2xl font-bold text-white disabled:opacity-40 shadow-md hover:scale-105 active:scale-95 transition" style={{ background: mentor.accent }}>Send</button>
         </div>
-        <p className="text-center text-[11px] text-slate-400 mt-2">{mentor.name} guides you — parents & teachers are part of the team.</p>
+        <p className="text-center text-[11px] text-violet-200 mt-2 font-medium">{mentor.name} helps you learn — parents & teachers are part of the team 💜</p>
       </div>
     </div>
   );
