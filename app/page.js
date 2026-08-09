@@ -59,6 +59,7 @@ export default function Home() {
   const [welcomed, setWelcomed] = useState(false);
   const [building, setBuilding] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
+  const [room, setRoom] = useState("home");
   const [savedMentors, setSavedMentors] = useState([]);
   const [student, setStudent] = useState("");
   const [grade, setGrade] = useState(3);
@@ -119,7 +120,6 @@ export default function Home() {
     setTimeout(() => setConfetti(false), 2200);
   }
 
-  // Load a student's stars
   async function loadStars(nameArg) {
     const s = (nameArg ?? student).trim();
     if (!s) return;
@@ -130,7 +130,6 @@ export default function Home() {
     } catch {}
   }
 
-  // Add a star and check for a new badge
   async function addStar() {
     const s = student.trim();
     if (!s) { setStars((v) => v + 1); return; }
@@ -138,12 +137,9 @@ export default function Home() {
       const r = await fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ student: s, add: 1 }) });
       const d = await r.json();
       const newTotal = d.stars || stars + 1;
-      // did we just cross a badge milestone?
       const unlocked = BADGES.find((b) => b.need === newTotal);
       setStars(newTotal);
-      if (unlocked) {
-        setTimeout(() => { setNewBadge(unlocked); sfx.badge(); }, 800);
-      }
+      if (unlocked) setTimeout(() => { setNewBadge(unlocked); sfx.badge(); }, 800);
     } catch { setStars((v) => v + 1); }
   }
 
@@ -221,14 +217,24 @@ export default function Home() {
     } catch {}
   }
 
+  // Pick a buddy → go to home base
   function start(m) {
     sfx.tap();
     setMentor(m);
-    const hi = student ? `Hi ${student}! I'm ${m.name}.` : `Hi! I'm ${m.name}.`;
-    const greeting = `${hi} ${m.tagline || ""} What would you like to figure out today?`;
-    setMessages([{ role: "assistant", content: greeting }]);
-    sfx.reply();
-    speak(greeting);
+    setMessages([]);
+    setRoom("home");
+  }
+
+  // Fly into a room (Learn / Quiz / Homework)
+  function enterRoom(nm) {
+    sfx.tap();
+    setMode(nm);
+    setRoom("chat");
+    setMessages([]);
+    const note = nm === "Quiz" ? `Let's start a ${subject} quiz! Ask me the first question.`
+      : nm === "Homework" ? `Can you help me with my homework?`
+      : `Let's learn something new in ${subject}!`;
+    sendText(note, []);
   }
 
   async function createMentor() {
@@ -246,10 +252,11 @@ export default function Home() {
     setBuilding(false);
   }
 
-  async function sendText(raw) {
+  async function sendText(raw, base) {
     const text = (raw ?? input).trim();
     if (!text || loading) return;
-    const next = [...messages, { role: "user", content: text }];
+    const history = base ?? messages;
+    const next = [...history, { role: "user", content: text }];
     setMessages(next); setInput(""); setLoading(true);
     try {
       const res = await fetch("/api/chat", {
@@ -329,7 +336,6 @@ export default function Home() {
     </div>
   ) : null;
 
-  // New-badge popup
   const BadgePopup = () => newBadge ? (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-6" onClick={() => setNewBadge(null)}>
       <div className="badge-pop bg-white/10 backdrop-blur-xl rounded-[2rem] ring-1 ring-white/30 p-8 text-center max-w-xs">
@@ -341,7 +347,6 @@ export default function Home() {
     </div>
   ) : null;
 
-  // Star counter chip (opens badges)
   const StarChip = () => (
     <button onClick={() => { sfx.tap(); setShowBadges(true); }} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 ring-1 ring-white/30 text-white text-sm font-bold active:scale-95 transition shrink-0">
       ⭐ {stars}
@@ -470,16 +475,57 @@ export default function Home() {
     );
   }
 
+  // ---------- HOME BASE ----------
+  if (room === "home") {
+    const tiles = [
+      { emoji: "📚", label: "Learn", desc: "Explore & discover", color: "#A78BFA", onClick: () => enterRoom("Learn") },
+      { emoji: "✏️", label: "Quiz", desc: "Earn stars ⭐", color: "#FBBF24", onClick: () => enterRoom("Quiz") },
+      { emoji: "🎒", label: "Homework", desc: "Get help", color: "#34D399", onClick: () => enterRoom("Homework") },
+      { emoji: "🎨", label: "My Buddy", desc: "Switch or create", color: "#F472B6", onClick: () => { sfx.tap(); setMentor(null); } },
+      { emoji: "🏅", label: "Badges", desc: `${stars} stars`, color: "#60A5FA", onClick: () => { sfx.tap(); setShowBadges(true); } },
+    ];
+    return (
+      <div className="relative min-h-screen flex flex-col items-center justify-center p-5" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
+        <div className="relative z-10 w-full max-w-md">
+          <div className="flex items-center justify-between mb-1">
+            <button onClick={() => { sfx.tap(); setMentor(null); }} className="text-white/70 hover:text-white text-xl">←</button>
+            <StarChip />
+          </div>
+          <div className="text-center mb-6 pop-in">
+            <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center shadow-2xl float-card ring-2 ring-white/30" style={{ background: mentor.soft }}>
+              <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "82%", height: "82%" }} />
+            </div>
+            <h1 className="font-title text-2xl sm:text-3xl font-bold text-white mt-3">Where to, {student || "explorer"}?</h1>
+            <p className="text-violet-200 text-sm mt-1">Tap a planet to begin ✨</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {tiles.map((t, i) => (
+              <button key={t.label} onClick={t.onClick} className="bounce-in flex flex-col items-center gap-2 active:scale-90 transition" style={{ animationDelay: `${i * 0.08}s` }}>
+                <div className="float-card w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl shadow-2xl"
+                  style={{ background: `radial-gradient(circle at 38% 32%, #ffffff40, ${t.color})`, boxShadow: `0 0 28px ${t.color}88`, animationDelay: `${i * 0.3}s` }}>
+                  {t.emoji}
+                </div>
+                <div className="font-title font-bold text-white text-sm sm:text-base">{t.label}</div>
+                <div className="text-[11px] text-violet-200 -mt-1">{t.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ---------- Chat screen ----------
   return (
     <div className="relative min-h-screen flex flex-col" style={galaxyBg}>
       {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
       <header className="relative z-10 flex items-center gap-2 px-3 sm:px-4 py-3 bg-white/10 backdrop-blur-xl ring-1 ring-white/20">
-        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setMentor(null); }} className="text-white/70 hover:text-white text-xl w-7 shrink-0">←</button>
+        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} className="text-white/70 hover:text-white text-xl w-7 shrink-0" title="Home">🏠</button>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ background: mentor.soft }}>{mentor.emoji}</div>
         <div className="leading-tight flex-1 min-w-0">
           <div className="font-title font-bold text-white truncate">{mentor.name}</div>
-          <div className="text-[11px] font-medium truncate" style={{ color: mentor.accent }}>{mentor.role} · Class {grade}</div>
+          <div className="text-[11px] font-medium truncate" style={{ color: mentor.accent }}>{mode} · {subject}</div>
         </div>
         <StarChip />
         <button onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-9 h-9 rounded-xl ring-1 ring-white/30 bg-white/10 flex items-center justify-center text-base shrink-0">
