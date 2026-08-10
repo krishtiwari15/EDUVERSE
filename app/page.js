@@ -1,16 +1,22 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import {
+  Home as HomeIcon, ArrowLeft, LogOut, Award, Lock, Mic, MicOff, Volume2, VolumeX,
+  Send, Sparkles, PencilLine, Backpack, Users, GraduationCap, Compass,
+  BarChart3, Play, Palette,
+} from "lucide-react";
 import Login from "./login";
 import Preferences from "./preferences";
 import { mentorAvatar } from "@/lib/avatar";
+import { Button, Surface, Badge, ProgressBar, Section, Reveal, RevealGroup, RevealItem } from "@/components/ui";
 
 const MENTORS = {
   nova: { name: "Luna", role: "Dreamer", emoji: "🌙", accent: "#A78BFA", soft: "#EDE9FE", tagline: "Let's explore the stars and discover cool things!" },
   atlas: { name: "Ellie", role: "Scientist", emoji: "🦋", accent: "#34D399", soft: "#D1FAE5", tagline: "Every question is a fun little experiment!" },
   case: { name: "Pip", role: "Stargazer", emoji: "🦉", accent: "#60A5FA", soft: "#DBEAFE", tagline: "Let's solve mysteries under the moonlight!" },
 };
-const LEVELS = ["Kid", "Teen", "Adult"];
 const EMOJIS = ["🌙", "⭐", "🪐", "🚀", "🦉", "🦋", "🐉", "🦄"];
 const COLORS = [
   { accent: "#A78BFA", soft: "#EDE9FE" },
@@ -20,7 +26,6 @@ const COLORS = [
   { accent: "#FBBF24", soft: "#FEF3C7" },
 ];
 const SUBJECTS = ["General", "Math", "Science", "English", "Coding", "Languages"];
-const MODES = ["Learn", "Quiz", "Homework"];
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
 
 const BADGES = [
@@ -29,6 +34,19 @@ const BADGES = [
   { need: 15, emoji: "🪐", name: "Planet Explorer" },
   { need: 30, emoji: "☄️", name: "Comet" },
   { need: 50, emoji: "🌌", name: "Galaxy Master" },
+];
+
+const STARTER_PROMPTS = {
+  Learn: ["Explain it simply", "Give me a real example", "Why does this matter?"],
+  Quiz: ["I'm ready, ask me!", "Make it a bit harder", "Give me a hint"],
+  Homework: ["Here's my problem", "I'm stuck on step one", "Check my answer"],
+};
+
+const ROADMAP = [
+  { icon: Users, title: "Parent Copilot", desc: "Plain-language updates on your child's progress." },
+  { icon: GraduationCap, title: "Teacher Copilot", desc: "AI-assisted lesson & assignment creation." },
+  { icon: Compass, title: "Opportunities", desc: "Scholarships, competitions & programs, matched to you." },
+  { icon: BarChart3, title: "Deep Analytics", desc: "The full story behind your learning streak." },
 ];
 
 function GalaxyBackground() {
@@ -59,13 +77,71 @@ function GalaxyBackground() {
 function MentorAvatar({ mentor, size = 56 }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <img src={mentorAvatar(mentor.name)} alt={mentor.name} className="w-full h-full rounded-2xl" style={{ background: mentor.soft }} />
+      <img src={mentorAvatar(mentor.name)} alt="" className="w-full h-full rounded-2xl" style={{ background: mentor.soft }} />
       <div className="absolute -bottom-1 -right-1 rounded-full flex items-center justify-center ring-2 ring-[#241B47]"
         style={{ width: size * 0.42, height: size * 0.42, fontSize: size * 0.24, background: mentor.soft }}>
         {mentor.emoji}
       </div>
     </div>
   );
+}
+
+const CONFETTI_BITS = ["🎊", "⭐", "🌟", "✨", "💜", "💛", "🩷", "🔵"];
+
+function Confetti({ particles }) {
+  if (!particles) return null;
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+      <div className="absolute bottom-2 left-2 text-4xl sm:text-5xl" style={{ animation: "popperShake 0.5s ease-out" }}>🎉</div>
+      <div className="absolute bottom-2 right-2 text-4xl sm:text-5xl -scale-x-100" style={{ animation: "popperShake 0.5s ease-out" }}>🎉</div>
+      {particles.map((p, i) => (
+        <div key={i} className="absolute text-lg sm:text-xl" style={{
+          bottom: "12px", [p.fromLeft ? "left" : "right"]: "12px",
+          "--dx": `${p.dx}px`, "--dy": `${p.dy}px`,
+          animation: `popperBurst ${p.duration}s cubic-bezier(0.15,0.7,0.4,1) forwards`,
+        }}>{CONFETTI_BITS[i % CONFETTI_BITS.length]}</div>
+      ))}
+    </div>
+  );
+}
+
+function BadgePopup({ badge, onClose }) {
+  if (!badge) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-6" onClick={onClose}>
+      <motion.div initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", damping: 16, stiffness: 220 }}
+        className="glass-card-elevated p-8 text-center max-w-xs" onClick={(e) => e.stopPropagation()}>
+        <div className="text-7xl mb-3">{badge.emoji}</div>
+        <div className="text-eyebrow text-[var(--color-gold)]">New badge unlocked!</div>
+        <div className="text-display text-white mt-1">{badge.name}</div>
+        <Button variant="primary" size="md" onClick={onClose} className="mt-5 w-full">Awesome!</Button>
+      </motion.div>
+    </div>
+  );
+}
+
+function StarChip({ stars, onClick }) {
+  return (
+    <button onClick={onClick} aria-label={`${stars} stars earned — view progress`} className="focus-ring flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)] bg-white/15 ring-1 ring-white/30 text-white text-sm font-bold active:scale-95 transition shrink-0">
+      <span className="text-[var(--color-gold)]">★</span> {stars}
+    </button>
+  );
+}
+
+function IconButton({ icon: Icon, active, activeIcon: ActiveIcon, label, className = "", ...props }) {
+  const Shown = active && ActiveIcon ? ActiveIcon : Icon;
+  return (
+    <button aria-label={label} title={label} className={`focus-ring w-11 h-11 rounded-xl ring-1 ring-white/25 bg-white/10 hover:bg-white/15 flex items-center justify-center shrink-0 transition ${className}`} {...props}>
+      <Shown size={18} strokeWidth={2} className="text-white" />
+    </button>
+  );
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 export default function Home() {
@@ -82,7 +158,7 @@ export default function Home() {
   const [muted, setMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
-  const [confetti, setConfetti] = useState(false);
+  const [confettiBurst, setConfettiBurst] = useState(null);
   const [stars, setStars] = useState(0);
   const [newBadge, setNewBadge] = useState(null);
   const recognitionRef = useRef(null);
@@ -151,10 +227,23 @@ export default function Home() {
     correct: () => { tone(523, 0.12); tone(659, 0.12, "sine", 0.15, 0.1); tone(988, 0.2, "sine", 0.15, 0.2); },
     badge: () => { tone(659, 0.15); tone(880, 0.15, "sine", 0.16, 0.12); tone(1319, 0.3, "sine", 0.16, 0.26); },
   };
+  function makeConfettiBurst() {
+    // Randomness belongs here, in an event handler — not in any render
+    // path — so the rendered particles are a pure function of props.
+    return Array.from({ length: 50 }).map((_, i) => {
+      const fromLeft = i % 2 === 0;
+      const angle = Math.random() * 60 + 15;
+      const dist = 160 + Math.random() * 320;
+      const dx = Math.sin((angle * Math.PI) / 180) * dist;
+      const dy = -(Math.cos((angle * Math.PI) / 180) * dist);
+      return { fromLeft, dx: fromLeft ? dx : -dx, dy, duration: 0.9 + Math.random() * 0.6 };
+    });
+  }
+
   function celebrate() {
     sfx.correct();
-    setConfetti(true);
-    setTimeout(() => setConfetti(false), 2200);
+    setConfettiBurst(makeConfettiBurst());
+    setTimeout(() => setConfettiBurst(null), 2200);
   }
 
   async function loadStars(nameArg) {
@@ -340,66 +429,21 @@ export default function Home() {
       @keyframes shoot { 0% { transform: translate(0,0) rotate(18deg); opacity: 0; } 8% { opacity: 1; } 22% { opacity: 1; } 40%,100% { transform: translate(130vw, 40vh) rotate(18deg); opacity: 0; } }
       @keyframes moonGlow { 0%,100% { box-shadow: 0 0 50px 16px #FDE68A55, inset -10px -8px 0 0 #00000015; } 50% { box-shadow: 0 0 80px 26px #FDE68A77, inset -10px -8px 0 0 #00000015; } }
       @keyframes floatG { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-20px) rotate(6deg); } }
-      @keyframes popIn { 0% { opacity: 0; transform: scale(0.85) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-      @keyframes bounceIn { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
       @keyframes floatCard { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
       @keyframes popperBurst { 0% { transform: translate(0,0) rotate(0deg); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 40vh)) rotate(720deg); opacity: 0; } }
       @keyframes popperShake { 0%,100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-15deg) scale(1.2); } 75% { transform: rotate(15deg) scale(1.2); } }
-      @keyframes badgePop { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
       @keyframes ring { 0% { transform: scale(0.7); opacity: 0.7; } 100% { transform: scale(1.8); opacity: 0; } }
       @keyframes riseUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-120px) scale(1.1); opacity: 0; } }
-      @keyframes bubbleIn { 0% { transform: scale(0.8) translateY(8px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-      .pop-in { animation: popIn 0.35s ease-out both; }
-      .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
       .float-card { animation: floatCard 4s ease-in-out infinite; }
-      .badge-pop { animation: badgePop 0.7s cubic-bezier(0.34,1.56,0.64,1) both; }
-      .bubble-in { animation: bubbleIn 0.4s ease-out both; }
-      h1, h2, .font-title { font-family: var(--font-fredoka), sans-serif; }
+      h1, h2, .font-title { font-family: var(--font-display), sans-serif; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     `}</style>
   );
 
-  const galaxyBg = { background: "radial-gradient(ellipse at 70% 15%, #3B2E63 0%, #241B47 30%, #150F2E 60%, #0A0718 100%)" };
-
-  const Confetti = () => confetti ? (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute bottom-2 left-2 text-4xl sm:text-5xl" style={{ animation: "popperShake 0.5s ease-out" }}>🎉</div>
-      <div className="absolute bottom-2 right-2 text-4xl sm:text-5xl -scale-x-100" style={{ animation: "popperShake 0.5s ease-out" }}>🎉</div>
-      {Array.from({ length: 50 }).map((_, i) => {
-        const bits = ["🎊", "⭐", "🌟", "✨", "💜", "💛", "🩷", "🔵"];
-        const fromLeft = i % 2 === 0;
-        const angle = (Math.random() * 60 + 15);
-        const dist = 160 + Math.random() * 320;
-        const dx = Math.sin((angle * Math.PI) / 180) * dist;
-        const dy = -(Math.cos((angle * Math.PI) / 180) * dist);
-        return (
-          <div key={i} className="absolute text-lg sm:text-xl" style={{
-            bottom: "12px", [fromLeft ? "left" : "right"]: "12px",
-            "--dx": `${fromLeft ? dx : -dx}px`, "--dy": `${dy}px`,
-            animation: `popperBurst ${0.9 + Math.random() * 0.6}s cubic-bezier(0.15,0.7,0.4,1) forwards`,
-          }}>{bits[i % bits.length]}</div>
-        );
-      })}
-    </div>
-  ) : null;
-
-  const BadgePopup = () => newBadge ? (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-6" onClick={() => setNewBadge(null)}>
-      <div className="badge-pop bg-white/10 backdrop-blur-xl rounded-[2rem] ring-1 ring-white/30 p-8 text-center max-w-xs">
-        <div className="text-7xl mb-3">{newBadge.emoji}</div>
-        <div className="text-violet-200 text-sm font-bold uppercase tracking-wide">New badge unlocked!</div>
-        <div className="font-title text-2xl font-bold text-white mt-1">{newBadge.name}</div>
-        <button onClick={() => setNewBadge(null)} className="mt-5 px-6 py-2.5 rounded-full font-bold text-violet-900 bg-white active:scale-95 transition">Awesome! 🎉</button>
-      </div>
-    </div>
-  ) : null;
-
-  const StarChip = () => (
-    <button onClick={() => { sfx.tap(); setShowBadges(true); }} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 ring-1 ring-white/30 text-white text-sm font-bold active:scale-95 transition shrink-0">
-      ⭐ {stars}
-    </button>
-  );
+  const galaxyBg = { background: "radial-gradient(ellipse at 70% 15%, var(--color-nebula-3) 0%, var(--color-nebula-2) 30%, var(--color-nebula-1) 60%, var(--color-void) 100%)" };
+  const openBadges = () => { sfx.tap(); setShowBadges(true); };
+  const closeBadgePopup = () => setNewBadge(null);
 
   // ---------- Auth ----------
   if (authUser === undefined) {
@@ -432,72 +476,109 @@ export default function Home() {
     );
   }
 
-  // ---------- Badges screen ----------
+  // ---------- Progress screen ----------
   if (showBadges) {
     const nextBadge = BADGES.find((b) => stars < b.need);
+    const prevNeed = [0, ...BADGES.map((b) => b.need)][BADGES.findIndex((b) => b === nextBadge)] || 0;
+    const pct = nextBadge ? Math.round(((stars - prevNeed) / (nextBadge.need - prevNeed)) * 100) : 100;
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
-        {styleBlock}<GalaxyBackground /><Confetti />
-        <div className="relative z-10 w-full max-w-md pop-in">
-          <button onClick={() => { sfx.tap(); setShowBadges(false); }} className="text-white/80 hover:text-white mb-3 font-semibold">← Back</button>
-          <div className="bg-white/10 backdrop-blur-xl rounded-[1.75rem] p-6 shadow-2xl ring-1 ring-white/20 text-center">
-            <div className="text-5xl mb-1">⭐</div>
-            <div className="font-title text-3xl font-bold text-white">{stars} Stars</div>
-            <p className="text-violet-200 text-sm mt-1">
-              {nextBadge ? `${nextBadge.need - stars} more to unlock ${nextBadge.name} ${nextBadge.emoji}` : "You've earned every badge! 🌌"}
-            </p>
-            <div className="grid grid-cols-5 gap-2 mt-6">
+        {styleBlock}<GalaxyBackground /><Confetti particles={confettiBurst} />
+        <div className="relative z-10 w-full max-w-md">
+          <button onClick={() => { sfx.tap(); setShowBadges(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
+            <ArrowLeft size={16} /> Back
+          </button>
+          <Surface tier={3} className="p-6 sm:p-8 text-center">
+            <p className="text-eyebrow text-[var(--color-gold)] mb-1">Your Progress</p>
+            <div className="text-hero text-white" style={{ fontSize: "clamp(2.5rem,8vw,3.5rem)" }}>{stars}</div>
+            <p className="text-white/60 text-sm -mt-1">stars earned</p>
+            {nextBadge && (
+              <div className="mt-5 text-left">
+                <div className="flex justify-between text-xs text-white/50 mb-1.5">
+                  <span>Next: {nextBadge.name} {nextBadge.emoji}</span>
+                  <span>{nextBadge.need - stars} to go</span>
+                </div>
+                <ProgressBar value={pct} tone="gold" />
+              </div>
+            )}
+            <RevealGroup className="grid grid-cols-5 gap-2 mt-7" stagger={0.04}>
               {BADGES.map((b) => {
                 const earned = stars >= b.need;
                 return (
-                  <div key={b.name} className="flex flex-col items-center">
-                    <div className={`w-full aspect-square rounded-2xl flex items-center justify-center text-2xl sm:text-3xl transition ${earned ? "bg-white/20 ring-2 ring-white/50" : "bg-white/5 ring-1 ring-white/10 opacity-40 grayscale"}`}>
-                      {earned ? b.emoji : "🔒"}
+                  <RevealItem key={b.name}>
+                    <div className="flex flex-col items-center">
+                      <div className={`w-full aspect-square rounded-2xl flex items-center justify-center text-2xl sm:text-3xl transition ${earned ? "bg-white/20 ring-2 ring-[var(--color-gold)]/60" : "bg-white/5 ring-1 ring-white/10 opacity-50"}`}>
+                        {earned ? b.emoji : <Lock size={16} className="text-white/40" />}
+                      </div>
+                      <div className={`text-[9px] mt-1 font-semibold leading-tight ${earned ? "text-white" : "text-white/40"}`}>{b.name}</div>
                     </div>
-                    <div className={`text-[9px] mt-1 font-semibold leading-tight ${earned ? "text-white" : "text-white/40"}`}>{b.name}</div>
-                  </div>
+                  </RevealItem>
                 );
               })}
-            </div>
-          </div>
+            </RevealGroup>
+          </Surface>
         </div>
       </div>
     );
   }
 
-  // ---------- Builder screen ----------
+  // ---------- Mentor Studio (builder) ----------
   if (building) {
     const c = COLORS[cColor];
+    const previewMentor = { name: cName || "Your buddy", soft: c.soft, emoji: cEmoji, accent: c.accent };
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
-        {styleBlock}<GalaxyBackground /><Confetti />
-        <div className="relative z-10 w-full max-w-lg pop-in">
-          <button onClick={() => { sfx.tap(); setBuilding(false); }} className="text-white/80 hover:text-white mb-3 font-semibold">← Back</button>
-          <div className="bg-white/10 backdrop-blur-xl rounded-[1.75rem] p-5 sm:p-6 shadow-2xl ring-1 ring-white/20">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="bounce-in"><MentorAvatar mentor={{ name: cName || "Your buddy", soft: c.soft, emoji: cEmoji }} size={56} /></div>
-              <div>
-                <div className="font-title font-bold text-white text-lg">{cName || "Your buddy"}</div>
-                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: c.accent }}>Custom Buddy · Oxidium Mind</div>
+      <div className="relative min-h-screen p-4 sm:p-6" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground /><Confetti particles={confettiBurst} />
+        <div className="relative z-10 max-w-4xl mx-auto py-4">
+          <button onClick={() => { sfx.tap(); setBuilding(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
+            <ArrowLeft size={16} /> Back
+          </button>
+          <p className="text-eyebrow text-[var(--color-aurora)]">Mentor Studio</p>
+          <h1 className="text-display text-white mt-1 mb-6">Design your buddy</h1>
+
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6 items-start">
+            {/* Config panel */}
+            <Surface tier={2} className="p-5 sm:p-6 order-2 md:order-1">
+              <label className="text-eyebrow text-white/50">Name</label>
+              <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/90 text-slate-800 text-base font-medium placeholder:text-slate-400" />
+
+              <label className="text-eyebrow text-white/50 flex items-center gap-1.5"><Palette size={12} /> Look</label>
+              <div className="grid grid-cols-4 gap-2 mt-2 mb-5">
+                {EMOJIS.map((e) => (
+                  <button key={e} onClick={() => { sfx.tap(); setCEmoji(e); }} aria-label={`Use ${e} icon`} aria-pressed={cEmoji === e} className={`focus-ring h-12 rounded-xl text-2xl flex items-center justify-center transition ${cEmoji === e ? "ring-2 ring-white scale-105 bg-white/20" : "ring-1 ring-white/20 hover:bg-white/10"}`}>{e}</button>
+                ))}
               </div>
-            </div>
-            <label className="text-sm font-bold text-white/80">Name</label>
-            <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="w-full mt-1 mb-4 px-4 py-3 rounded-2xl bg-white/90 outline-none text-slate-700 text-base focus:ring-4 focus:ring-violet-400/50 transition" />
-            <label className="text-sm font-bold text-white/80">Pick a look</label>
-            <div className="grid grid-cols-4 gap-2 mt-1 mb-4">
-              {EMOJIS.map((e) => (
-                <button key={e} onClick={() => { sfx.tap(); setCEmoji(e); }} className={`h-12 rounded-2xl text-2xl flex items-center justify-center transition ${cEmoji === e ? "ring-2 ring-white scale-105 bg-white/20" : "ring-1 ring-white/30"}`}>{e}</button>
-              ))}
-            </div>
-            <label className="text-sm font-bold text-white/80">Pick a color</label>
-            <div className="flex gap-2 mt-1 mb-4">
-              {COLORS.map((col, i) => (
-                <button key={i} onClick={() => { sfx.tap(); setCColor(i); }} className={`w-11 h-11 rounded-full transition ${cColor === i ? "ring-2 ring-offset-2 ring-offset-transparent ring-white scale-105" : ""}`} style={{ background: col.accent }} />
-              ))}
-            </div>
-            <label className="text-sm font-bold text-white/80">Describe your buddy&apos;s personality</label>
-            <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={3} placeholder="e.g. A funny robot who loves space and tells silly jokes!" className="w-full mt-1 mb-5 px-4 py-3 rounded-2xl bg-white/90 outline-none text-slate-700 text-base resize-none focus:ring-4 focus:ring-violet-400/50 transition" />
-            <button onClick={createMentor} disabled={!cName.trim()} className="w-full py-3.5 rounded-2xl font-bold text-white text-base disabled:opacity-40 shadow-lg active:scale-95 transition" style={{ background: c.accent }}>Create my buddy ✨</button>
+
+              <label className="text-eyebrow text-white/50">Color</label>
+              <div className="flex gap-2 mt-2 mb-5">
+                {COLORS.map((col, i) => (
+                  <button key={i} onClick={() => { sfx.tap(); setCColor(i); }} aria-label={`Use color ${i + 1}`} aria-pressed={cColor === i} className={`focus-ring w-10 h-10 rounded-full transition ${cColor === i ? "ring-2 ring-offset-2 ring-offset-[#1a1330] ring-white scale-105" : ""}`} style={{ background: col.accent }} />
+                ))}
+              </div>
+
+              <label className="text-eyebrow text-white/50">Personality</label>
+              <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={3} placeholder="e.g. A funny robot who loves space and tells silly jokes!" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/90 text-slate-800 text-sm resize-none placeholder:text-slate-400" />
+
+              <Button variant="primary" size="md" onClick={createMentor} disabled={!cName.trim()} className="w-full">Create my buddy</Button>
+            </Surface>
+
+            {/* Live preview panel */}
+            <Surface tier={3} className="p-6 sm:p-8 order-1 md:order-2 md:sticky md:top-6">
+              <p className="text-eyebrow text-white/40 mb-4">Live preview</p>
+              <motion.div key={cName + cEmoji + cColor} initial={{ scale: 0.94, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center text-center">
+                <MentorAvatar mentor={previewMentor} size={88} />
+                <div className="text-heading text-white mt-4">{cName || "Your buddy"}</div>
+                <p className="text-eyebrow mt-1" style={{ color: c.accent }}>Custom Buddy · Oxidium Mind</p>
+                <div className="glass-card p-4 mt-5 text-left w-full">
+                  <p className="text-white/50 text-xs mb-1.5">How they&apos;ll greet you</p>
+                  <p className="text-white/90 text-sm leading-relaxed">
+                    {cPersona.trim()
+                      ? `"Hey! I'm ${cName || "your buddy"} — ${cPersona.trim().charAt(0).toLowerCase() + cPersona.trim().slice(1)}. Ready to learn something together?"`
+                      : `"Hey! I'm ${cName || "your buddy"}. What are we learning today?"`}
+                  </p>
+                </div>
+              </motion.div>
+            </Surface>
           </div>
         </div>
       </div>
@@ -508,148 +589,235 @@ export default function Home() {
   if (!mentor) {
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
-        {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
-        <div className="relative z-10 w-full max-w-3xl pop-in py-6">
-          <div className="flex justify-between items-center mb-2">
-            <button onClick={logout} className="text-violet-200/70 hover:text-white text-xs font-semibold transition">Log out</button>
-            <StarChip />
-          </div>
-          <div className="text-center">
-            <div className="text-4xl sm:text-5xl mb-2 float-card">🌙</div>
-            <h1 className="text-3xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight px-2">{displayName ? `Hi ${displayName}!` : "Pick your buddy!"}</h1>
-            <p className="text-violet-200 mt-2 font-medium text-sm sm:text-base px-4">Every buddy shares one caring Oxidium Mind ✨ — pick one to begin.</p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
-            {Object.entries(MENTORS).map(([key, m], idx) => (
-              <button key={key} onClick={() => start(m)} className="bounce-in text-left bg-white/10 backdrop-blur-xl rounded-[1.4rem] p-4 sm:p-5 shadow-xl ring-1 ring-white/20 active:scale-95 hover:ring-white/50 transition-all" style={{ animationDelay: `${idx * 0.08}s` }}>
-                <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
-                <div className="font-title font-bold text-white text-base sm:text-lg">{m.name}</div>
-                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>{m.role}</div>
-                <p className="text-xs sm:text-sm text-violet-100/80 mt-1.5 leading-snug">{m.tagline}</p>
-              </button>
-            ))}
-            <button onClick={() => { sfx.tap(); setBuilding(true); }} className="bounce-in flex flex-col items-center justify-center bg-white/5 border-2 border-dashed border-white/40 rounded-[1.4rem] p-4 sm:p-5 active:scale-95 transition-all" style={{ animationDelay: "0.24s" }}>
-              <div className="text-3xl sm:text-4xl mb-2 float-card">✨</div>
-              <div className="font-title font-bold text-white text-sm sm:text-base text-center">Create your own</div>
+        {styleBlock}<GalaxyBackground /><Confetti particles={confettiBurst} /><BadgePopup badge={newBadge} onClose={closeBadgePopup} />
+        <div className="relative z-10 w-full max-w-3xl py-6">
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={logout} className="focus-ring flex items-center gap-1.5 text-violet-200/70 hover:text-white text-xs font-semibold transition">
+              <LogOut size={13} /> Log out
             </button>
-            {savedMentors.map((m, i) => (
-              <button key={"saved" + i} onClick={() => start(m)} className="bounce-in text-left bg-white/10 backdrop-blur-xl rounded-[1.4rem] p-4 sm:p-5 shadow-xl ring-1 ring-white/20 active:scale-95 transition-all">
-                <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
-                <div className="font-title font-bold text-white text-base sm:text-lg">{m.name}</div>
-                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>Your buddy</div>
-                <p className="text-xs sm:text-sm text-violet-100/80 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
-              </button>
-            ))}
+            <StarChip stars={stars} onClick={openBadges} />
           </div>
+          <Reveal className="text-center">
+            <p className="text-eyebrow text-[var(--color-aurora)] mb-2">{displayName ? `Hi ${displayName}` : "Welcome"}</p>
+            <h1 className="text-hero text-white" style={{ fontSize: "clamp(2rem,5vw,3.25rem)" }}>Pick your buddy</h1>
+            <p className="text-white/50 mt-3">Every buddy shares one caring Oxidium Mind — pick the one that fits your mood.</p>
+          </Reveal>
+          <RevealGroup className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8" stagger={0.06}>
+            {Object.entries(MENTORS).map(([key, m]) => (
+              <RevealItem key={key}>
+                <button onClick={() => start(m)} className="focus-ring w-full text-left glass-card p-4 sm:p-5 hover:bg-white/15 hover:-translate-y-1 active:scale-95 transition-all duration-200">
+                  <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
+                  <div className="text-heading text-white text-base">{m.name}</div>
+                  <div className="text-eyebrow mt-0.5" style={{ color: m.accent }}>{m.role}</div>
+                  <p className="text-xs sm:text-sm text-white/60 mt-1.5 leading-snug">{m.tagline}</p>
+                </button>
+              </RevealItem>
+            ))}
+            <RevealItem>
+              <button onClick={() => { sfx.tap(); setBuilding(true); }} className="focus-ring w-full h-full flex flex-col items-center justify-center bg-white/5 border-2 border-dashed border-white/25 hover:border-white/40 rounded-[var(--radius-lg)] p-4 sm:p-5 active:scale-95 transition-all min-h-[9.5rem]">
+                <Sparkles size={26} className="text-white/70 mb-2" strokeWidth={1.75} />
+                <div className="text-heading text-white text-sm text-center">Create your own</div>
+              </button>
+            </RevealItem>
+            {savedMentors.map((m, i) => (
+              <RevealItem key={"saved" + i}>
+                <button onClick={() => start(m)} className="focus-ring w-full text-left glass-card p-4 sm:p-5 hover:bg-white/15 hover:-translate-y-1 active:scale-95 transition-all duration-200">
+                  <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
+                  <div className="text-heading text-white text-base">{m.name}</div>
+                  <div className="text-eyebrow mt-0.5" style={{ color: m.accent }}>Your buddy</div>
+                  <p className="text-xs sm:text-sm text-white/60 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
+                </button>
+              </RevealItem>
+            ))}
+          </RevealGroup>
         </div>
       </div>
     );
   }
 
-  // ---------- HOME BASE ----------
+  // ---------- STUDENT DASHBOARD ----------
   if (room === "home") {
-    const tiles = [
-      { emoji: "📚", label: "Learn", desc: "Explore & discover", color: "#A78BFA", onClick: () => enterRoom("Learn") },
-      { emoji: "✏️", label: "Quiz", desc: "Earn stars ⭐", color: "#FBBF24", onClick: () => enterRoom("Quiz") },
-      { emoji: "🎒", label: "Homework", desc: "Get help", color: "#34D399", onClick: () => enterRoom("Homework") },
-      { emoji: "🎨", label: "My Buddy", desc: "Switch or create", color: "#F472B6", onClick: () => { sfx.tap(); setMentor(null); } },
-      { emoji: "🏅", label: "Badges", desc: `${stars} stars`, color: "#60A5FA", onClick: () => { sfx.tap(); setShowBadges(true); } },
+    const nextBadge = BADGES.find((b) => stars < b.need);
+    const quickActions = [
+      { icon: PencilLine, label: "Quiz", desc: "Earn stars", onClick: () => enterRoom("Quiz") },
+      { icon: Backpack, label: "Homework", desc: "Get unstuck", onClick: () => enterRoom("Homework") },
+      { icon: Users, label: "My Buddy", desc: "Switch or create", onClick: () => { sfx.tap(); setMentor(null); } },
+      { icon: Award, label: "Progress", desc: `${stars} stars`, onClick: openBadges },
     ];
     return (
-      <div className="relative min-h-screen flex flex-col items-center justify-center p-5" style={galaxyBg}>
-        {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
-        <div className="relative z-10 w-full max-w-md">
-          <div className="flex items-center justify-between mb-1">
-            <button onClick={() => { sfx.tap(); setMentor(null); }} className="text-white/70 hover:text-white text-xl">←</button>
-            <StarChip />
+      <div className="relative min-h-screen p-4 sm:p-6" style={galaxyBg}>
+        {styleBlock}<GalaxyBackground /><Confetti particles={confettiBurst} /><BadgePopup badge={newBadge} onClose={closeBadgePopup} />
+        <div className="relative z-10 w-full max-w-3xl mx-auto py-3">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => { sfx.tap(); setMentor(null); }} aria-label="Switch buddy" className="focus-ring w-11 h-11 flex items-center justify-center text-white/70 hover:text-white rounded-xl hover:bg-white/10">
+              <ArrowLeft size={18} />
+            </button>
+            <StarChip stars={stars} onClick={openBadges} />
           </div>
-          <div className="text-center mb-6 pop-in">
-            <div className="w-28 h-28 mx-auto rounded-full flex items-center justify-center shadow-2xl float-card ring-2 ring-white/30" style={{ background: mentor.soft }}>
-              <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "82%", height: "82%" }} />
-            </div>
-            <h1 className="font-title text-2xl sm:text-3xl font-bold text-white mt-3">Where to, {displayName || "explorer"}?</h1>
-            <p className="text-violet-200 text-sm mt-1">Tap a planet to begin ✨</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {tiles.map((t, i) => (
-              <button key={t.label} onClick={t.onClick} className="bounce-in flex flex-col items-center gap-2 active:scale-90 transition" style={{ animationDelay: `${i * 0.08}s` }}>
-                <div className="float-card w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl shadow-2xl"
-                  style={{ background: `radial-gradient(circle at 38% 32%, #ffffff40, ${t.color})`, boxShadow: `0 0 28px ${t.color}88`, animationDelay: `${i * 0.3}s` }}>
-                  {t.emoji}
-                </div>
-                <div className="font-title font-bold text-white text-sm sm:text-base">{t.label}</div>
-                <div className="text-[11px] text-violet-200 -mt-1">{t.desc}</div>
-              </button>
+
+          <Reveal>
+            <p className="text-eyebrow text-[var(--color-aurora)] mb-1.5">{greeting()}, {displayName || "explorer"}</p>
+            <h1 className="text-display text-white">Your next mission</h1>
+          </Reveal>
+
+          {/* Hero mission card */}
+          <Reveal delay={0.08}>
+            <Surface tier={3} className="mt-4 p-5 sm:p-7 flex items-center gap-5">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shrink-0 float-card ring-2 ring-white/25" style={{ background: mentor.soft }}>
+                <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "80%", height: "80%" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-eyebrow" style={{ color: mentor.accent }}>{mentor.name} recommends</p>
+                <h2 className="text-heading text-white mt-1">Continue {subject}</h2>
+                <p className="text-white/55 text-sm mt-1 hidden sm:block">Pick up where you left off — {mentor.name} is ready when you are.</p>
+              </div>
+              <Button variant="primary" size="md" icon={Play} onClick={() => enterRoom("Learn")} className="shrink-0 !px-5">
+                <span className="hidden sm:inline">Start</span>
+              </Button>
+            </Surface>
+          </Reveal>
+
+          {/* Quick actions */}
+          <RevealGroup className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4" stagger={0.05}>
+            {quickActions.map((a) => (
+              <RevealItem key={a.label}>
+                <button onClick={a.onClick} aria-label={`${a.label} — ${a.desc}`} className="focus-ring w-full glass-card p-4 flex flex-col items-center gap-2 hover:bg-white/15 hover:-translate-y-0.5 active:scale-95 transition-all text-center">
+                  <a.icon size={20} className="text-white/80" strokeWidth={1.75} />
+                  <div>
+                    <div className="text-white text-sm font-semibold">{a.label}</div>
+                    <div className="text-white/45 text-[11px]">{a.desc}</div>
+                  </div>
+                </button>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
+
+          {/* Progress + subjects */}
+          <Reveal delay={0.05}>
+            <Section eyebrow="Progress" title="Your learning streak" className="mt-8">
+              <Surface tier={2} className="p-5">
+                {nextBadge ? (
+                  <>
+                    <div className="flex justify-between text-sm text-white/70 mb-2">
+                      <span>{stars} stars</span>
+                      <span className="text-white/45">{nextBadge.need - stars} to {nextBadge.name} {nextBadge.emoji}</span>
+                    </div>
+                    <ProgressBar value={(stars / nextBadge.need) * 100} tone="gold" />
+                  </>
+                ) : (
+                  <p className="text-white/70 text-sm">🌌 You&apos;ve unlocked every badge — legendary.</p>
+                )}
+              </Surface>
+            </Section>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <Section eyebrow="Explore" title="Subjects" className="mt-8">
+              <div className="flex gap-2 flex-wrap">
+                {SUBJECTS.map((s) => (
+                  <button key={s} onClick={() => { setSubject(s); enterRoom("Learn"); }} className={`focus-ring px-4 py-2 rounded-[var(--radius-pill)] text-sm font-semibold transition ${subject === s ? "bg-white text-violet-800" : "glass-card text-white hover:bg-white/15"}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </Section>
+          </Reveal>
+
+          {/* Roadmap teasers */}
+          <Reveal delay={0.1}>
+            <Section eyebrow="Coming to EduVerse" title="The full learning universe" className="mt-8 mb-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {ROADMAP.map((r) => (
+                  <div key={r.title} className="rounded-[var(--radius-md)] border border-dashed border-white/15 p-4 opacity-70">
+                    <r.icon size={18} className="text-white/50 mb-2" strokeWidth={1.75} />
+                    <div className="text-white/80 text-sm font-semibold">{r.title}</div>
+                    <p className="text-white/40 text-[11px] mt-1 leading-snug">{r.desc}</p>
+                    <Badge tone="neutral" className="mt-2 !text-[10px]">Coming soon</Badge>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          </Reveal>
         </div>
       </div>
     );
   }
 
   // ---------- IMMERSIVE CHAT ROOM ----------
+  const showStarters = messages.length <= 1 && !loading;
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden" style={galaxyBg}>
-      {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
+      {styleBlock}<GalaxyBackground /><Confetti particles={confettiBurst} /><BadgePopup badge={newBadge} onClose={closeBadgePopup} />
       <header className="relative z-20 flex items-center gap-2 px-3 sm:px-4 py-3">
-        <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} className="w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/25 flex items-center justify-center text-lg shrink-0" title="Home">🏠</button>
-        <div className="flex-1 text-center">
-          <div className="font-title font-bold text-white leading-tight">{mentor.name}</div>
+        <IconButton icon={HomeIcon} label="Go home" onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} />
+        <div className="flex-1 text-center min-w-0">
+          <div className="text-heading text-white leading-tight truncate">{mentor.name}</div>
           <div className="text-[11px] font-medium" style={{ color: mentor.accent }}>{mode} · {subject}</div>
         </div>
-        <StarChip />
-        <button onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} className="w-10 h-10 rounded-xl ring-1 ring-white/25 bg-white/10 flex items-center justify-center text-base shrink-0">
-          {muted ? "🔇" : "🔊"}
-        </button>
+        <StarChip stars={stars} onClick={openBadges} />
+        <IconButton icon={Volume2} activeIcon={VolumeX} active={muted} label={muted ? "Unmute voice" : "Mute voice"} aria-pressed={muted} onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} />
       </header>
 
-      <div className="relative z-10 flex flex-col items-center pt-2 pb-3">
-        <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+      <div className="relative z-10 flex flex-col items-center pt-1 pb-2">
+        <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
           {speaking && [0, 1, 2].map((r) => (
-            <div key={r} className="absolute rounded-full" style={{ width: 180, height: 180, border: `2px solid ${mentor.accent}`, animation: `ring 1.6s ease-out ${r * 0.5}s infinite` }} />
+            <div key={r} className="absolute rounded-full" style={{ width: 110, height: 110, border: `2px solid ${mentor.accent}`, animation: `ring 1.6s ease-out ${r * 0.5}s infinite` }} />
           ))}
-          <div className="absolute rounded-full" style={{ width: 190, height: 190, background: mentor.accent, filter: "blur(38px)", opacity: speaking ? 0.55 : 0.28, transition: "opacity 0.3s" }} />
+          <div className="absolute rounded-full" style={{ width: 116, height: 116, background: mentor.accent, filter: "blur(30px)", opacity: speaking ? 0.55 : 0.28, transition: "opacity 0.3s" }} />
           {speaking && ["⭐", "✨", "💫", "🌟"].map((s, i) => (
-            <div key={i} className="absolute text-xl" style={{ left: `${20 + i * 20}%`, bottom: "30%", animation: `riseUp ${1.8 + i * 0.3}s ease-out ${i * 0.4}s infinite` }}>{s}</div>
+            <div key={i} className="absolute text-lg" style={{ left: `${20 + i * 20}%`, bottom: "30%", animation: `riseUp ${1.8 + i * 0.3}s ease-out ${i * 0.4}s infinite` }}>{s}</div>
           ))}
-          <div className="relative rounded-full flex items-center justify-center shadow-2xl float-card ring-4 ring-white/30" style={{ width: 200, height: 200, background: `radial-gradient(circle at 40% 35%, #ffffff55, ${mentor.soft})` }}>
+          <div className="relative rounded-full flex items-center justify-center shadow-2xl float-card ring-4 ring-white/25" style={{ width: 124, height: 124, background: `radial-gradient(circle at 40% 35%, #ffffff55, ${mentor.soft})` }}>
             <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.5 : 0.7} style={{ width: "85%", height: "85%" }} />
           </div>
         </div>
         <div className="mt-1 text-xs font-bold text-violet-200 h-4">{listening ? "🎧 listening…" : speaking ? "💬 speaking…" : ""}</div>
-
-        {lastReply && (
-          <div key={lastReply} className="bubble-in relative mt-2 mx-4 max-w-md">
-            <div className="bg-white/95 text-slate-700 px-5 py-3 rounded-3xl shadow-xl text-[15px] leading-relaxed text-center">{lastReply}</div>
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45" />
-          </div>
-        )}
-        {loading && (
-          <div className="mt-3 bg-white/95 px-4 py-3 rounded-3xl flex gap-1 shadow-lg">
-            {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ background: mentor.accent, animationDelay: `${d * 0.15}s` }} />)}
-          </div>
-        )}
       </div>
 
-      <div className="relative z-10 flex gap-2 pt-1 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
+      <div className="relative z-10 flex gap-2 pt-1 pb-2 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
         {SUBJECTS.map((s) => (
-          <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition ${subject === s ? "bg-white text-violet-800" : "bg-white/10 text-white ring-1 ring-white/25"}`}>{s}</button>
+          <button key={s} onClick={() => switchContext(null, s)} aria-pressed={subject === s} className={`focus-ring px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition ${subject === s ? "bg-white text-violet-800" : "bg-white/10 text-white ring-1 ring-white/25"}`}>{s}</button>
         ))}
       </div>
 
-      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-2 max-w-2xl w-full mx-auto no-scrollbar">
-        {messages.filter((m) => m.role === "user").slice(-3).map((m, i) => (
-          <div key={i} className="flex justify-end pop-in">
-            <div className="max-w-[80%] px-4 py-2 rounded-2xl rounded-br-md text-sm bg-violet-500/90 text-white shadow">{m.content}</div>
+      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-2.5 max-w-2xl w-full mx-auto no-scrollbar">
+        <AnimatePresence initial={false}>
+          {messages.map((m, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow ${m.role === "user" ? "rounded-br-md bg-violet-500/90 text-white" : "rounded-bl-md bg-white/95 text-slate-700"}`}>
+                {m.content}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white/95 px-4 py-3 rounded-2xl rounded-bl-md flex gap-1 shadow">
+              {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ background: mentor.accent, animationDelay: `${d * 0.15}s` }} />)}
+            </div>
           </div>
-        ))}
+        )}
+        {showStarters && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {(STARTER_PROMPTS[mode] || STARTER_PROMPTS.Learn).map((p) => (
+              <button key={p} onClick={() => sendText(p)} className="focus-ring px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 text-white/80 ring-1 ring-white/20 hover:bg-white/15 transition">
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="relative z-10 px-3 sm:px-4 pb-4 pt-1 max-w-2xl w-full mx-auto">
         <div className="flex items-end gap-2 bg-white/95 rounded-3xl p-2 shadow-2xl">
-          <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
-          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening…" : `Talk to ${mentor.name}…`} className="flex-1 resize-none outline-none bg-transparent px-2 py-2.5 text-slate-700 text-base max-h-24" />
-          <button onClick={() => { sfx.tap(); send(); }} disabled={loading || !input.trim()} className="px-4 py-2.5 rounded-2xl font-bold text-white text-sm disabled:opacity-40 shadow-md active:scale-95 transition shrink-0" style={{ background: mentor.accent }}>Send</button>
+          <button onClick={listening ? stopListening : startListening} aria-label={listening ? "Stop and send" : "Talk"} aria-pressed={listening} className={`focus-ring w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>
+            {listening ? <MicOff size={17} /> : <Mic size={17} />}
+          </button>
+          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={1} placeholder={listening ? "Listening…" : `Talk to ${mentor.name}…`} aria-label="Message" className="focus-ring flex-1 resize-none bg-transparent px-2 py-2.5 text-slate-700 text-base max-h-24" />
+          <button onClick={() => { sfx.tap(); send(); }} disabled={loading || !input.trim()} aria-label="Send message" className="focus-ring w-11 h-11 rounded-2xl flex items-center justify-center text-white disabled:opacity-40 shadow-md active:scale-95 transition shrink-0" style={{ background: mentor.accent }}>
+            <Send size={16} strokeWidth={2.25} />
+          </button>
         </div>
       </div>
     </div>

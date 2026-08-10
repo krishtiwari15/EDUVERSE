@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
+/*
+ * EduVerse design system — "moonlit galaxy," formalized.
+ * Single source of truth for color, type, elevation, radius, and motion so
+ * every screen reads as one product instead of each component re-declaring
+ * its own hex values and easing curves. See DESIGN.md for the full rationale.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0718;
+  --foreground: #f5f3ff;
+
+  /* ---- Surface layers (the "space" the product sits in) ---- */
+  --color-void: #0a0718;
+  --color-nebula-1: #150f2e;
+  --color-nebula-2: #241b47;
+  --color-nebula-3: #3b2e63;
+
+  /* ---- Accent system: two tones with distinct jobs, not one color
+     doing everything ---- */
+  --color-primary: #a78bfa;       /* brand + primary actions */
+  --color-primary-soft: #ede9fe;
+  --color-aurora: #5eead4;        /* AI / intelligence moments, progress */
+  --color-aurora-soft: #d1fae5;
+  --color-gold: #fbbf24;          /* achievement + reward only */
+
+  --color-ink: #f5f3ff;           /* primary text on dark surfaces */
+  --color-ink-muted: #c4b5fd;     /* secondary text on dark surfaces */
+  --color-ink-faint: rgba(245, 243, 255, 0.55);
+
+  /* ---- Glass elevation tiers ---- */
+  --surface-1: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.1);
+  --surface-3: rgba(255, 255, 255, 0.15);
+  --border-glass: rgba(255, 255, 255, 0.18);
+  --border-glass-strong: rgba(255, 255, 255, 0.3);
+
+  /* ---- Radius scale ---- */
+  --radius-sm: 0.75rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
+  --radius-pill: 999px;
+
+  /* ---- Motion: a signature deceleration, not a different curve per
+     component. Durations tuned so nothing feels sluggish. ---- */
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 450ms;
+
+  --focus-ring: 0 0 0 3px rgba(167, 139, 250, 0.55);
+
+  --font-display: var(--font-display), sans-serif;
+  --font-body: var(--font-body), sans-serif;
+  --font-companion: var(--font-fredoka), sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ---------------------------------------------------------------- */
+/* Typography scale — large, confident headlines; calm, legible body */
+/* ---------------------------------------------------------------- */
+.text-hero {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+}
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+}
+.text-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  font-size: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+}
+.text-eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+.font-companion {
+  font-family: var(--font-companion);
+}
+
+/* ---------------------------------------------------------------- */
+/* Surfaces */
+/* ---------------------------------------------------------------- */
+.glass-card {
+  background: var(--surface-2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+}
+.glass-card-elevated {
+  background: var(--surface-3);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border-glass-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------------------------------------------------------------- */
+/* Respect prefers-reduced-motion globally */
+/* ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

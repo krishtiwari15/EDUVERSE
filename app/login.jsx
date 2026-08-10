@@ -1,13 +1,22 @@
 "use client";
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Sparkles, GraduationCap, Compass, ArrowRight, Mail, Lock, User } from "lucide-react";
+import { Button, Reveal } from "@/components/ui";
 
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
 
 const LEVELS = [
-  { key: "Kid", label: "Kid", emoji: "🧒" },
-  { key: "Teen", label: "Teen", emoji: "🧑‍🎓" },
-  { key: "Adult", label: "Adult", emoji: "🧑" },
+  { key: "Kid", label: "Kid" },
+  { key: "Teen", label: "Teen" },
+  { key: "Adult", label: "Adult" },
+];
+
+const HIGHLIGHTS = [
+  { icon: GraduationCap, text: "An AI tutor that teaches like a real person — not a search engine" },
+  { icon: Compass, text: "A mentor that remembers your journey, not just your last question" },
+  { icon: Sparkles, text: "One caring intelligence — the Oxidium Mind — behind every buddy" },
 ];
 
 export default function Login({ onAuth }) {
@@ -45,105 +54,117 @@ export default function Login({ onAuth }) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center p-6"
-      style={{ background: "radial-gradient(ellipse at 70% 12%, #3B2E63 0%, #241B47 30%, #150F2E 62%, #0A0718 100%)" }}>
-
+    <div className="relative min-h-screen overflow-hidden" style={{ background: "radial-gradient(ellipse 120% 80% at 15% 0%, var(--color-nebula-3) 0%, var(--color-nebula-2) 32%, var(--color-nebula-1) 62%, var(--color-void) 100%)" }}>
       <style jsx global>{`
-        @keyframes lFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-        @keyframes lGlow { 0%,100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.12); } }
-        @keyframes lTwinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
-        @keyframes lFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
-        .l-fade { animation: lFadeIn 0.4s ease-out both; }
+        @keyframes entryTwinkle { 0%,100% { opacity: 0.15; } 50% { opacity: 0.9; } }
+        @keyframes entryDrift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(14px,-18px); } }
       `}</style>
 
-      {/* Stars */}
-      {Array.from({ length: 40 }).map((_, i) => (
-        <div key={i} className="absolute rounded-full bg-white" style={{
-          width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2,
-          top: `${(i * 23) % 100}%`, left: `${(i * 47) % 100}%`,
-          animation: `lTwinkle ${2 + (i % 4)}s ease-in-out infinite`,
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div key={i} className="absolute rounded-full bg-white pointer-events-none" style={{
+          width: i % 5 === 0 ? 3 : 2, height: i % 5 === 0 ? 3 : 2,
+          top: `${(i * 17) % 100}%`, left: `${(i * 53) % 100}%`,
+          animation: `entryTwinkle ${2.5 + (i % 5)}s ease-in-out ${(i % 10) * 0.25}s infinite`,
         }} />
       ))}
+      <div className="absolute -top-40 -right-40 w-[32rem] h-[32rem] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(94,234,212,0.16), transparent 70%)", animation: "entryDrift 12s ease-in-out infinite" }} />
+      <div className="absolute -bottom-40 -left-32 w-[28rem] h-[28rem] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(167,139,250,0.18), transparent 70%)", animation: "entryDrift 14s ease-in-out 2s infinite" }} />
 
-      <div className="relative z-10 flex flex-col items-center text-center w-full max-w-sm">
-        <div className="relative flex items-center justify-center mb-3" style={{ width: 140, height: 140 }}>
-          <div className="absolute rounded-full" style={{ width: 120, height: 120, background: "#A78BFA", filter: "blur(38px)", animation: "lGlow 3s ease-in-out infinite" }} />
-          <div className="relative rounded-full flex items-center justify-center ring-4 ring-white/30 shadow-2xl" style={{ width: 112, height: 112, background: "radial-gradient(circle at 40% 35%, #ffffff66, #EDE9FE)", animation: "lFloat 4s ease-in-out infinite" }}>
-            <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "86%", height: "86%" }} />
-          </div>
+      <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
+        {/* Left — the pitch */}
+        <div className="hidden lg:flex flex-col justify-center px-16 xl:px-20 py-16">
+          <Reveal>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/15 text-white/70 text-xs font-semibold w-fit mb-8">
+              <Sparkles size={13} className="text-[var(--color-aurora)]" />
+              Your AI learning universe
+            </div>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <h1 className="text-hero text-white max-w-xl">
+              Learning that feels like <span className="text-[var(--color-aurora)]">discovery</span>, not homework.
+            </h1>
+          </Reveal>
+          <Reveal delay={0.16}>
+            <p className="text-white/60 text-lg mt-6 max-w-md leading-relaxed">
+              EduVerse pairs you with an AI buddy who teaches, quizzes, and remembers where you left off — built around how you actually learn.
+            </p>
+          </Reveal>
+          <Reveal delay={0.24}>
+            <div className="mt-10 space-y-4 max-w-md">
+              {HIGHLIGHTS.map((h, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <h.icon size={16} className="text-[var(--color-primary)]" strokeWidth={2} />
+                  </div>
+                  <p className="text-white/70 text-sm leading-relaxed pt-1.5">{h.text}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>
-          EduVerse
-        </h1>
-        <p className="text-violet-200 text-sm mt-1 mb-6">
-          {mode === "signup" ? "Create your account to start exploring" : "Welcome back, explorer"}
-        </p>
-
-        <form onSubmit={submit} className="w-full flex flex-col items-center gap-3">
-          {mode === "signup" && (
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="What's your name?"
-              className="w-full px-6 py-3 rounded-full text-center text-base font-semibold text-violet-900 bg-white/95 outline-none shadow-xl focus:ring-4 focus:ring-violet-300/70"
-              required
-            />
-          )}
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="w-full px-6 py-3 rounded-full text-center text-base font-semibold text-violet-900 bg-white/95 outline-none shadow-xl focus:ring-4 focus:ring-violet-300/70"
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={mode === "signup" ? "Create a password" : "Password"}
-            className="w-full px-6 py-3 rounded-full text-center text-base font-semibold text-violet-900 bg-white/95 outline-none shadow-xl focus:ring-4 focus:ring-violet-300/70"
-            minLength={6}
-            required
-          />
-
-          {mode === "signup" && (
-            <div className="l-fade mt-1 flex flex-col items-center gap-2">
-              <p className="text-white/90 text-sm font-semibold" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>Who&apos;s exploring?</p>
-              <div className="flex gap-2">
-                {LEVELS.map((l) => (
-                  <button key={l.key} type="button" onClick={() => setLevel(l.key)}
-                    className={`flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl font-bold transition active:scale-95 ${level === l.key ? "bg-white text-violet-700 scale-105 shadow-lg" : "bg-white/15 text-white ring-1 ring-white/30"}`}>
-                    <span className="text-xl">{l.emoji}</span>
-                    <span className="text-xs">{l.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {error && <p className="l-fade text-rose-200 text-sm font-medium bg-rose-900/30 px-4 py-2 rounded-xl">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="mt-2 w-full px-10 py-3.5 rounded-full text-lg font-bold text-violet-900 bg-gradient-to-r from-violet-200 to-indigo-200 shadow-xl active:scale-95 transition disabled:opacity-50"
+        {/* Right — the form */}
+        <div className="flex items-center justify-center p-6 sm:p-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="glass-card-elevated w-full max-w-sm p-8"
           >
-            {busy ? "One sec…" : mode === "signup" ? "Create account 🚀" : "Log in 🌙"}
-          </button>
-        </form>
+            <div className="flex items-center gap-3 mb-1 lg:hidden">
+              <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center ring-1 ring-white/25" style={{ background: "radial-gradient(circle at 40% 35%, #ffffff40, #241B47)" }}>
+                <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "80%", height: "80%" }} />
+              </div>
+              <span className="text-heading text-white">EduVerse</span>
+            </div>
+            <h2 className="text-display text-white mt-2 lg:mt-0">{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
+            <p className="text-white/50 text-sm mt-1.5 mb-7">
+              {mode === "signup" ? "Start your learning universe in under a minute." : "Pick up right where you left off."}
+            </p>
 
-        <button
-          type="button"
-          onClick={() => { setError(""); setMode(mode === "signup" ? "login" : "signup"); }}
-          className="mt-5 text-violet-200 text-sm font-medium hover:text-white transition"
-        >
-          {mode === "signup" ? "Already have an account? Log in" : "New here? Create an account"}
-        </button>
+            <form onSubmit={submit} className="flex flex-col gap-3">
+              {mode === "signup" && (
+                <label className="relative block">
+                  <User size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={2} />
+                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="focus-ring w-full pl-11 pr-4 py-3 rounded-xl bg-white/95 text-slate-800 text-sm font-medium placeholder:text-slate-400" required />
+                </label>
+              )}
+              <label className="relative block">
+                <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={2} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="focus-ring w-full pl-11 pr-4 py-3 rounded-xl bg-white/95 text-slate-800 text-sm font-medium placeholder:text-slate-400" required />
+              </label>
+              <label className="relative block">
+                <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={2} />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "Create a password" : "Password"} minLength={6} className="focus-ring w-full pl-11 pr-4 py-3 rounded-xl bg-white/95 text-slate-800 text-sm font-medium placeholder:text-slate-400" required />
+              </label>
+
+              {mode === "signup" && (
+                <div className="pt-1">
+                  <p className="text-eyebrow text-white/40 mb-2">Who&apos;s learning</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {LEVELS.map((l) => (
+                      <button key={l.key} type="button" onClick={() => setLevel(l.key)} aria-pressed={level === l.key}
+                        className={`focus-ring py-2.5 rounded-xl text-sm font-semibold transition ${level === l.key ? "bg-white text-violet-800" : "bg-white/10 text-white/70 ring-1 ring-white/15"}`}>
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {error && <p role="alert" className="text-rose-200 text-sm font-medium bg-rose-500/15 ring-1 ring-rose-400/30 px-4 py-2.5 rounded-xl">{error}</p>}
+
+              <Button type="submit" variant="primary" size="md" icon={ArrowRight} iconPosition="right" disabled={busy} className="w-full mt-2">
+                {busy ? "One sec…" : mode === "signup" ? "Create account" : "Log in"}
+              </Button>
+            </form>
+
+            <button type="button" onClick={() => { setError(""); setMode(mode === "signup" ? "login" : "signup"); }} className="focus-ring mt-5 text-white/50 hover:text-white text-sm font-medium transition w-full text-center">
+              {mode === "signup" ? "Already have an account? Log in" : "New here? Create an account"}
+            </button>
+          </motion.div>
+        </div>
       </div>
-
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-violet-300/60 text-xs">✨ where every question becomes an adventure ✨</div>
     </div>
   );
 }
