@@ -16,7 +16,7 @@ const LEVELS = [
 const HIGHLIGHTS = [
   { icon: GraduationCap, text: "An AI tutor that teaches like a real person — not a search engine" },
   { icon: Compass, text: "A mentor that remembers your journey, not just your last question" },
-  { icon: Sparkles, text: "One caring intelligence — the Oxidium Mind — behind every buddy" },
+  { icon: Sparkles, text: "One caring intelligence — the Obsidian Mind — behind every buddy" },
 ];
 
 export default function Login({ onAuth }) {

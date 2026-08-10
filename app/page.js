@@ -568,7 +568,7 @@ export default function Home() {
               <motion.div key={cName + cEmoji + cColor} initial={{ scale: 0.94, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center text-center">
                 <MentorAvatar mentor={previewMentor} size={88} />
                 <div className="text-heading text-white mt-4">{cName || "Your buddy"}</div>
-                <p className="text-eyebrow mt-1" style={{ color: c.accent }}>Custom Buddy · Oxidium Mind</p>
+                <p className="text-eyebrow mt-1" style={{ color: c.accent }}>Custom Buddy · Obsidian Mind</p>
                 <div className="glass-card p-4 mt-5 text-left w-full">
                   <p className="text-white/50 text-xs mb-1.5">How they&apos;ll greet you</p>
                   <p className="text-white/90 text-sm leading-relaxed">
@@ -600,7 +600,7 @@ export default function Home() {
           <Reveal className="text-center">
             <p className="text-eyebrow text-[var(--color-aurora)] mb-2">{displayName ? `Hi ${displayName}` : "Welcome"}</p>
             <h1 className="text-hero text-white" style={{ fontSize: "clamp(2rem,5vw,3.25rem)" }}>Pick your buddy</h1>
-            <p className="text-white/50 mt-3">Every buddy shares one caring Oxidium Mind — pick the one that fits your mood.</p>
+            <p className="text-white/50 mt-3">Every buddy shares one caring Obsidian Mind — pick the one that fits your mood.</p>
           </Reveal>
           <RevealGroup className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8" stagger={0.06}>
             {Object.entries(MENTORS).map(([key, m]) => (
