@@ -12,9 +12,16 @@ const QUOTES = [
   "The sky is not the limit — it's the beginning 🌌",
 ];
 
+const LEVELS = [
+  { key: "Kid", label: "Kid", emoji: "🧒" },
+  { key: "Teen", label: "Teen", emoji: "🧑‍🎓" },
+  { key: "Adult", label: "Adult", emoji: "🧑" },
+];
+
 export default function Welcome({ onStart }) {
   const [quote, setQuote] = useState(0);
   const [name, setName] = useState("");
+  const [level, setLevel] = useState("");
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -22,11 +29,10 @@ export default function Welcome({ onStart }) {
     return () => clearInterval(q);
   }, []);
 
-  // Play exit animation, then enter the app
   function go() {
-    if (!name.trim() || leaving) return;
+    if (!name.trim() || !level || leaving) return;
     setLeaving(true);
-    setTimeout(() => onStart(name.trim()), 900); // matches exit duration
+    setTimeout(() => onStart(name.trim(), level), 900);
   }
 
   return (
@@ -44,12 +50,11 @@ export default function Welcome({ onStart }) {
         @keyframes wQuote { 0% { opacity: 0; transform: translateY(8px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
         @keyframes wMoonGlow { 0%,100% { box-shadow: 0 0 70px 24px #C4B5FD44; } 50% { box-shadow: 0 0 110px 36px #C4B5FD66; } }
         @keyframes wBtnPulse { 0%,100% { box-shadow: 0 0 0 0 #ffffff55; } 50% { box-shadow: 0 0 0 12px #ffffff00; } }
-
-        /* EXIT: everything lifts up and fades */
         @keyframes flyUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-160px) scale(0.85); } }
         @keyframes buddyLaunch { 0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 30% { transform: translateY(20px) scale(0.95); } 100% { opacity: 0; transform: translateY(-120vh) scale(0.5) rotate(-12deg); } }
         @keyframes moonExit { 0% { opacity: 1; transform: translate(-40px, -40px); } 100% { opacity: 0; transform: translate(-40px, -260px); } }
         @keyframes fadeOut { to { opacity: 0; } }
+        @keyframes stepIn { 0% { opacity: 0; transform: translateY(14px) scale(0.96); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 
         .drop-1 { animation: dropIn 0.9s cubic-bezier(0.34,1.4,0.64,1) 0.2s both; }
         .drop-2 { animation: dropBig 1.1s cubic-bezier(0.34,1.5,0.64,1) 0.6s both; }
@@ -57,8 +62,8 @@ export default function Welcome({ onStart }) {
         .drop-4 { animation: dropIn 0.8s cubic-bezier(0.34,1.4,0.64,1) 1.6s both; }
         .drop-5 { animation: dropIn 0.8s cubic-bezier(0.34,1.4,0.64,1) 2.0s both; }
         .drop-6 { animation: dropIn 0.8s cubic-bezier(0.34,1.4,0.64,1) 2.5s both; }
+        .step-in { animation: stepIn 0.5s ease-out both; }
 
-        /* when leaving, override with exit anims (staggered bottom-to-top) */
         .leaving .exit-a { animation: flyUp 0.7s ease-in 0s both; }
         .leaving .exit-b { animation: flyUp 0.7s ease-in 0.08s both; }
         .leaving .exit-c { animation: flyUp 0.7s ease-in 0.16s both; }
@@ -92,44 +97,59 @@ export default function Welcome({ onStart }) {
 
         {/* Center content */}
         <div className="relative z-10 flex flex-col items-center text-center min-h-screen justify-center">
-          <div className="drop-2 exit-buddy relative flex items-center justify-center" style={{ width: 260, height: 260 }}>
-            <div className="absolute rounded-full" style={{ width: 210, height: 210, background: "#A78BFA", filter: "blur(45px)", animation: "wGlow 3s ease-in-out 1.6s infinite" }} />
-            <div className="relative rounded-full flex items-center justify-center ring-4 ring-white/30 shadow-2xl" style={{ width: 200, height: 200, background: "radial-gradient(circle at 40% 35%, #ffffff66, #EDE9FE)", animation: "wFloat 4s ease-in-out 1.6s infinite" }}>
+          <div className="drop-2 exit-buddy relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+            <div className="absolute rounded-full" style={{ width: 200, height: 200, background: "#A78BFA", filter: "blur(45px)", animation: "wGlow 3s ease-in-out 1.6s infinite" }} />
+            <div className="relative rounded-full flex items-center justify-center ring-4 ring-white/30 shadow-2xl" style={{ width: 190, height: 190, background: "radial-gradient(circle at 40% 35%, #ffffff66, #EDE9FE)", animation: "wFloat 4s ease-in-out 1.6s infinite" }}>
               <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "86%", height: "86%" }} />
             </div>
           </div>
 
-          <h1 className="drop-3 exit-d mt-4 text-4xl sm:text-6xl font-bold text-white drop-shadow-lg" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>
+          <h1 className="drop-3 exit-d mt-3 text-4xl sm:text-6xl font-bold text-white drop-shadow-lg" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>
             EduVerse
           </h1>
 
-          <div className="drop-4 exit-c h-8 mt-2 flex items-center">
-            <p key={quote} className="text-violet-200 text-base sm:text-lg font-medium" style={{ animation: "wQuote 3s ease-in-out infinite" }}>
+          <div className="drop-4 exit-c h-7 mt-1 flex items-center">
+            <p key={quote} className="text-violet-200 text-sm sm:text-lg font-medium" style={{ animation: "wQuote 3s ease-in-out infinite" }}>
               {QUOTES[quote]}
             </p>
           </div>
 
-          <p className="drop-5 exit-b mt-3 text-white/90 text-lg sm:text-xl font-semibold px-4" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>
-            Hi there, little explorer! 👋<br />I'm your learning buddy.
-          </p>
-
-          <div className="drop-6 exit-a mt-6 flex flex-col items-center gap-4 w-full">
+          {/* Name */}
+          <div className="drop-5 exit-b mt-4 w-full flex flex-col items-center">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") go(); }}
-              placeholder="What's your name?"
-              className="w-64 px-6 py-3.5 rounded-full text-center text-lg font-semibold text-violet-900 bg-white/95 outline-none shadow-xl focus:ring-4 focus:ring-violet-300/70"
+              placeholder="What's your name, explorer?"
+              className="w-72 max-w-full px-6 py-3 rounded-full text-center text-base font-semibold text-violet-900 bg-white/95 outline-none shadow-xl focus:ring-4 focus:ring-violet-300/70"
             />
+          </div>
+
+          {/* Who's exploring — appears once a name is typed */}
+          {name.trim() && (
+            <div className="step-in exit-a mt-5 flex flex-col items-center gap-3">
+              <p className="text-white/90 font-semibold" style={{ fontFamily: "var(--font-fredoka), sans-serif" }}>Who's exploring today?</p>
+              <div className="flex gap-3">
+                {LEVELS.map((l) => (
+                  <button key={l.key} onClick={() => setLevel(l.key)}
+                    className={`flex flex-col items-center gap-1 px-5 py-3 rounded-2xl font-bold transition active:scale-95 ${level === l.key ? "bg-white text-violet-700 scale-105 shadow-lg" : "bg-white/15 text-white ring-1 ring-white/30"}`}>
+                    <span className="text-2xl">{l.emoji}</span>
+                    <span className="text-sm">{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Start — appears once name + level chosen */}
+          {name.trim() && level && (
             <button
               onClick={go}
-              disabled={!name.trim()}
-              className="px-10 py-3.5 rounded-full text-lg font-bold text-violet-900 bg-gradient-to-r from-violet-200 to-indigo-200 shadow-xl active:scale-95 transition disabled:opacity-40"
-              style={{ animation: name.trim() && !leaving ? "wBtnPulse 1.8s ease-in-out infinite" : "none" }}
+              className="step-in exit-a mt-6 px-10 py-3.5 rounded-full text-lg font-bold text-violet-900 bg-gradient-to-r from-violet-200 to-indigo-200 shadow-xl active:scale-95 transition"
+              style={{ animation: "wBtnPulse 1.8s ease-in-out infinite" }}
             >
               Let's explore! 🚀
             </button>
-          </div>
+          )}
         </div>
 
         <div className="drop-1 exit-a absolute bottom-5 left-1/2 -translate-x-1/2 text-violet-300/60 text-xs">✨ where every question becomes an adventure ✨</div>

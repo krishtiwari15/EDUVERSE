@@ -8,7 +8,7 @@ const MENTORS = {
   atlas: { name: "Ellie", role: "Scientist", emoji: "🦋", accent: "#34D399", soft: "#D1FAE5", tagline: "Every question is a fun little experiment!" },
   case: { name: "Pip", role: "Stargazer", emoji: "🦉", accent: "#60A5FA", soft: "#DBEAFE", tagline: "Let's solve mysteries under the moonlight!" },
 };
-const GRADES = [1, 2, 3, 4, 5, 6, 7, 8];
+const LEVELS = ["Kid", "Teen", "Adult"];
 const EMOJIS = ["🌙", "⭐", "🪐", "🚀", "🦉", "🦋", "🐉", "🦄"];
 const COLORS = [
   { accent: "#A78BFA", soft: "#EDE9FE" },
@@ -17,7 +17,7 @@ const COLORS = [
   { accent: "#F472B6", soft: "#FCE7F3" },
   { accent: "#FBBF24", soft: "#FEF3C7" },
 ];
-const SUBJECTS = ["General", "Math", "Science", "English", "Social Studies", "GK"];
+const SUBJECTS = ["General", "Math", "Science", "English", "Coding", "Languages"];
 const MODES = ["Learn", "Quiz", "Homework"];
 const CHARACTER_URL = "https://lottie.host/b99ef145-b573-4305-9164-7f0bf1997d30/IeL2KG7tpc.lottie";
 
@@ -62,7 +62,7 @@ export default function Home() {
   const [room, setRoom] = useState("home");
   const [savedMentors, setSavedMentors] = useState([]);
   const [student, setStudent] = useState("");
-  const [grade, setGrade] = useState(3);
+  const [level, setLevel] = useState("Kid");
   const [subject, setSubject] = useState("General");
   const [mode, setMode] = useState("Learn");
   const [muted, setMuted] = useState(false);
@@ -262,7 +262,7 @@ export default function Home() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, mentor, grade, student, subject, mode }),
+        body: JSON.stringify({ messages: next, mentor, student, subject, mode, level }),
       });
       const data = await res.json();
       let reply = data.reply || "Let's try that again — say it once more?";
@@ -357,7 +357,7 @@ export default function Home() {
 
   // ---------- Welcome ----------
   if (!welcomed) {
-    return <Welcome onStart={(nm) => { setStudent(nm); loadMentors(nm); loadStars(nm); setWelcomed(true); }} />;
+    return <Welcome onStart={(nm, lvl) => { setStudent(nm); setLevel(lvl || "Kid"); loadMentors(nm); loadStars(nm); setWelcomed(true); }} />;
   }
 
   // ---------- Badges screen ----------
@@ -442,7 +442,7 @@ export default function Home() {
           <div className="text-center">
             <div className="text-4xl sm:text-5xl mb-2 float-card">🌙</div>
             <h1 className="text-3xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight px-2">{student ? `Hi ${student}!` : "Pick your buddy!"}</h1>
-            <p className="text-violet-200 mt-2 font-medium text-sm sm:text-base px-4">A friend who helps you explore and learn under the stars.</p>
+            <p className="text-violet-200 mt-2 font-medium text-sm sm:text-base px-4">Your AI tutor for anything — pick a buddy to begin.</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
             {Object.entries(MENTORS).map(([key, m], idx) => (
@@ -464,12 +464,6 @@ export default function Home() {
                 <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>Your buddy</div>
                 <p className="text-xs sm:text-sm text-violet-100/80 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
               </button>
-            ))}
-          </div>
-          <div className="mt-6 flex items-center justify-center gap-1.5 flex-wrap px-2">
-            <span className="text-sm text-violet-200 mr-1 font-medium w-full text-center sm:w-auto mb-1 sm:mb-0">I'm in Class</span>
-            {GRADES.map((g) => (
-              <button key={g} onClick={() => { sfx.tap(); setGrade(g); }} className={`w-10 h-10 rounded-full text-sm font-bold transition active:scale-90 ${grade === g ? "bg-white text-violet-700 scale-110" : "bg-white/15 text-white ring-1 ring-white/30"}`}>{g}</button>
             ))}
           </div>
         </div>
@@ -522,8 +516,6 @@ export default function Home() {
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden" style={galaxyBg}>
       {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
-
-      {/* Top bar */}
       <header className="relative z-20 flex items-center gap-2 px-3 sm:px-4 py-3">
         <button onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} className="w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/25 flex items-center justify-center text-lg shrink-0" title="Home">🏠</button>
         <div className="flex-1 text-center">
@@ -536,42 +528,24 @@ export default function Home() {
         </button>
       </header>
 
-      {/* Big buddy center stage */}
       <div className="relative z-10 flex flex-col items-center pt-2 pb-3">
         <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
-          {/* speaking rings */}
           {speaking && [0, 1, 2].map((r) => (
-            <div key={r} className="absolute rounded-full" style={{
-              width: 180, height: 180, border: `2px solid ${mentor.accent}`,
-              animation: `ring 1.6s ease-out ${r * 0.5}s infinite`,
-            }} />
+            <div key={r} className="absolute rounded-full" style={{ width: 180, height: 180, border: `2px solid ${mentor.accent}`, animation: `ring 1.6s ease-out ${r * 0.5}s infinite` }} />
           ))}
-          {/* aura */}
-          <div className="absolute rounded-full" style={{
-            width: 190, height: 190, background: mentor.accent,
-            filter: "blur(38px)", opacity: speaking ? 0.55 : 0.28, transition: "opacity 0.3s",
-          }} />
-          {/* floating stars while speaking */}
+          <div className="absolute rounded-full" style={{ width: 190, height: 190, background: mentor.accent, filter: "blur(38px)", opacity: speaking ? 0.55 : 0.28, transition: "opacity 0.3s" }} />
           {speaking && ["⭐", "✨", "💫", "🌟"].map((s, i) => (
-            <div key={i} className="absolute text-xl" style={{
-              left: `${20 + i * 20}%`, bottom: "30%",
-              animation: `riseUp ${1.8 + i * 0.3}s ease-out ${i * 0.4}s infinite`,
-            }}>{s}</div>
+            <div key={i} className="absolute text-xl" style={{ left: `${20 + i * 20}%`, bottom: "30%", animation: `riseUp ${1.8 + i * 0.3}s ease-out ${i * 0.4}s infinite` }}>{s}</div>
           ))}
-          {/* the buddy */}
-          <div className="relative rounded-full flex items-center justify-center shadow-2xl float-card ring-4 ring-white/30"
-            style={{ width: 200, height: 200, background: `radial-gradient(circle at 40% 35%, #ffffff55, ${mentor.soft})` }}>
+          <div className="relative rounded-full flex items-center justify-center shadow-2xl float-card ring-4 ring-white/30" style={{ width: 200, height: 200, background: `radial-gradient(circle at 40% 35%, #ffffff55, ${mentor.soft})` }}>
             <DotLottieReact src={CHARACTER_URL} loop autoplay speed={speaking ? 1.5 : 0.7} style={{ width: "85%", height: "85%" }} />
           </div>
         </div>
         <div className="mt-1 text-xs font-bold text-violet-200 h-4">{listening ? "🎧 listening…" : speaking ? "💬 speaking…" : ""}</div>
 
-        {/* Speech bubble — buddy's latest words */}
         {lastReply && (
           <div key={lastReply} className="bubble-in relative mt-2 mx-4 max-w-md">
-            <div className="bg-white/95 text-slate-700 px-5 py-3 rounded-3xl shadow-xl text-[15px] leading-relaxed text-center">
-              {lastReply}
-            </div>
+            <div className="bg-white/95 text-slate-700 px-5 py-3 rounded-3xl shadow-xl text-[15px] leading-relaxed text-center">{lastReply}</div>
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45" />
           </div>
         )}
@@ -582,14 +556,12 @@ export default function Home() {
         )}
       </div>
 
-      {/* Subject switcher */}
       <div className="relative z-10 flex gap-2 pt-1 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
         {SUBJECTS.map((s) => (
           <button key={s} onClick={() => switchContext(null, s)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition ${subject === s ? "bg-white text-violet-800" : "bg-white/10 text-white ring-1 ring-white/25"}`}>{s}</button>
         ))}
       </div>
 
-      {/* your recent messages (small, scrollable) */}
       <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-2 max-w-2xl w-full mx-auto no-scrollbar">
         {messages.filter((m) => m.role === "user").slice(-3).map((m, i) => (
           <div key={i} className="flex justify-end pop-in">
@@ -598,7 +570,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Input */}
       <div className="relative z-10 px-3 sm:px-4 pb-4 pt-1 max-w-2xl w-full mx-auto">
         <div className="flex items-end gap-2 bg-white/95 rounded-3xl p-2 shadow-2xl">
           <button onClick={listening ? stopListening : startListening} className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>🎤</button>
