@@ -117,6 +117,14 @@ export default function Login({ onAuth }) {
               </div>
               <span className="text-heading text-white">EduVerse</span>
             </div>
+            <div className="lg:hidden mb-5">
+              <h1 className="text-display text-white leading-tight">
+                Learning that feels like <span className="text-[var(--color-aurora)]">discovery</span>, not homework.
+              </h1>
+              <p className="text-white/55 text-sm mt-2 leading-relaxed">
+                An AI buddy that teaches, quizzes, and remembers where you left off.
+              </p>
+            </div>
             <h2 className="text-display text-white mt-2 lg:mt-0">{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
             <p className="text-white/50 text-sm mt-1.5 mb-7">
               {mode === "signup" ? "Start your learning universe in under a minute." : "Pick up right where you left off."}
