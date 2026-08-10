@@ -1,1066 +1,240 @@
-# DESIGN.md — AI Learning Platform Design System
+# EDUVERSE — Design System
 
-## 1. Product Vision
+> **North Star:** *"It should feel like stepping into a living, breathing galaxy where learning is an adventure — every screen alive, every tap delightful, every moment beautiful."*
 
-Design a learning platform that feels like a **personal AI learning universe**, not a traditional school management system.
+EduVerse is a **motion-first** AI learning universe. Motion and beauty are not decoration here — they ARE the product. Where a normal app asks "do we need this animation?", EduVerse asks "how do we make this moment magical?"
 
-The experience should make students feel:
+The feeling we're always chasing:
 
-* Curious
-* Motivated
-* Safe
-* Supported
-* Independent
-* Excited to learn
-
-The platform should combine the warmth of a great teacher with the intelligence of an AI assistant.
-
-Primary product areas:
-
-* AI Tutor
-* AI Mentor
-* Mentor Studio
-* Parent Copilot
-* Teacher Copilot
-* Student Dashboard
-* Learning Paths
-* Assignments
-* Quizzes
-* Progress & Analytics
-* Opportunities
-* AI-powered study tools
-
----
-
-# 2. Design Principles
-
-## 2.1 Student First
-
-Every screen should answer:
-
-> "How does this help the student learn?"
-
-Avoid unnecessary dashboards, statistics, buttons, or complicated navigation.
-
-## 2.2 Friendly Intelligence
-
-The interface should feel intelligent without feeling robotic.
-
-Use:
-
-* Friendly language
-* Helpful microcopy
-* Conversational AI interfaces
-* Small moments of encouragement
-* Clear explanations
-
-Avoid:
-
-* Corporate jargon
-* Overly technical language
-* Cold enterprise UI
-
-## 2.3 Calm Over Clutter
-
-Students should never feel overwhelmed.
-
-Use:
-
-* Generous whitespace
-* Clear hierarchy
-* Progressive disclosure
-* Short sections
-* Visual grouping
-
-Do not place too many cards or statistics on one screen.
-
-## 2.4 Learning Should Feel Like Progress
-
-Use visual progress indicators such as:
-
-* XP
-* Levels
-* Learning streaks
-* Skill progress
-* Completed lessons
-* Mastery percentages
-* Learning journeys
-
-Gamification should motivate learning rather than distract from it.
-
-## 2.5 Trustworthy AI
-
-AI should feel helpful and transparent.
-
-When appropriate, communicate:
-
-* Why the AI is making a recommendation
-* Where information comes from
-* Confidence or uncertainty
-* When a teacher or parent should be involved
-
-Never make the AI appear omniscient.
-
----
-
-# 3. Visual Identity
-
-## Overall Style
-
-Use a:
-
-**Modern + Educational + Futuristic + Playful + Premium**
-
-visual language.
-
-The interface should feel closer to a modern consumer technology product than an old-school education portal.
-
-Use subtle futuristic elements without making the product look like a science-fiction game.
-
----
-
-# 4. Color System
-
-Use a restrained color palette.
-
-## Primary
-
-Primary brand color:
-
-`#6366F1`
-
-Use for:
-
-* Primary buttons
-* Active navigation
-* Important links
-* Selected states
-* AI interactions
-
-## Secondary
-
-Secondary accent:
-
-`#8B5CF6`
-
-Use for:
-
-* AI Mentor
-* Special learning features
-* Highlights
-* Secondary actions
-
-## Success
-
-`#22C55E`
-
-Use for:
-
-* Completed lessons
-* Correct answers
-* Achievements
-* Positive progress
-
-## Warning
-
-`#F59E0B`
-
-Use for:
-
-* Attention states
-* Pending tasks
-* Important reminders
-
-## Error
-
-`#EF4444`
-
-Use for:
-
-* Errors
-* Failed actions
-* Incorrect answers
-* Critical warnings
-
-## Background
-
-Light mode:
-
-`#F8FAFC`
-
-Dark mode:
-
-`#0F172A`
-
-## Surface
-
-Light:
-
-`#FFFFFF`
-
-Dark:
-
-`#1E293B`
-
-## Text
-
-Primary:
-
-`#0F172A`
-
-Secondary:
-
-`#64748B`
-
-Muted:
-
-`#94A3B8`
-
-In dark mode, use appropriate light equivalents.
-
-Do not use excessive colors.
-
-Color should communicate meaning, not decoration.
-
----
-
-# 5. Typography
-
-Use **Inter** as the primary font.
-
-Fallback:
-
-`system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-
-## Headings
-
-Use bold or semibold typography.
-
-H1:
-
-* Large
-* Bold
-* Clear
-* Strong visual hierarchy
-
-H2:
-
-* Semibold
-* Clear section separation
-
-H3:
-
-* Medium/Semibold
-
-## Body
-
-Body text should be:
-
-* Easy to read
-* Comfortable line height
-* Short paragraphs
-* Appropriate contrast
-
-Avoid extremely small text.
-
-Minimum recommended body size:
-
-`14px`
-
-Preferred:
-
-`15–16px`
-
----
-
-# 6. Spacing
-
-Use a consistent spacing scale based on multiples of 4.
-
-Recommended:
-
-* 4px
-* 8px
-* 12px
-* 16px
-* 20px
-* 24px
-* 32px
-* 40px
-* 48px
-* 64px
-
-Do not create random spacing values unless necessary.
-
----
-
-# 7. Border Radius
-
-Use modern rounded components.
-
-Small:
-
-`8px`
-
-Medium:
-
-`12px`
-
-Large:
-
-`16px`
-
-Cards:
-
-`16px`
-
-Large feature cards:
-
-`20px`
-
-Avoid excessive pill-shaped UI.
-
-Use pills primarily for:
-
-* Tags
-* Status indicators
-* Categories
-* Filters
-
----
-
-# 8. Shadows
-
-Use subtle shadows.
-
-Cards should generally use:
-
-* Very light shadow
-* Subtle border
-* Clear separation from background
-
-Avoid heavy drop shadows.
-
-The UI should feel lightweight.
-
----
-
-# 9. Layout
-
-Use a responsive layout.
-
-Desktop:
-
-* Persistent sidebar
-* Main content area
-* Optional right-side contextual panel
-
-Tablet:
-
-* Collapsible sidebar
-
-Mobile:
-
-* Bottom navigation or compact navigation
-* Full-width content
-* Stacked cards
-* Touch-friendly controls
-
-Minimum touch target:
-
-`44px`
-
----
-
-# 10. Navigation
-
-Primary student navigation:
-
-* Home
-* AI Tutor
-* AI Mentor
-* Learn
-* Practice
-* Progress
-* Opportunities
-
-Secondary:
-
-* Profile
-* Settings
-* Help
-
-Navigation should remain predictable.
-
-Do not hide important learning features behind multiple levels of menus.
-
----
-
-# 11. AI Tutor
-
-The AI Tutor should feel like a personal teacher.
-
-The interface should prioritize conversation and learning.
-
-Recommended layout:
-
-```text
-┌──────────────────────────────────────┐
-│ AI Tutor                             │
-│                                      │
-│  👋 Hi! What are we learning today? │
-│                                      │
-│  ┌──────────────────────────────┐    │
-│  │ Explain photosynthesis       │    │
-│  └──────────────────────────────┘    │
-│                                      │
-│  Suggested questions                │
-│                                      │
-│  [Explain simply] [Give example]    │
-│                                      │
-│  ┌──────────────────────────────┐    │
-│  │ Ask your question...     🎤  │    │
-│  └──────────────────────────────┘    │
-└──────────────────────────────────────┘
-```
-
-The tutor should support:
-
-* Text
-* Voice
-* Images
-* Follow-up questions
-* Step-by-step explanations
-* Examples
-* Quizzes
-* Hints
-* Socratic questioning
-
-Never overwhelm students with long AI responses.
-
-Prefer:
-
-1. Explanation
-2. Example
-3. Check understanding
-4. Next step
-
----
-
-# 12. AI Mentor
-
-The AI Mentor should feel more personal than the AI Tutor.
-
-The Mentor helps students with:
-
-* Goals
-* Career exploration
-* Motivation
-* Study planning
-* Habits
-* Projects
-* Opportunities
-* Personal growth
-
-The mentor should have a distinct visual identity.
-
-Use:
-
-* Avatar
-* Friendly greeting
-* Progress context
-* Personalized recommendations
-
-Example:
-
-> "You've been consistent with Python this week. Want to build a small project to apply what you've learned?"
-
-Avoid making the mentor feel like a generic chatbot.
-
----
-
-# 13. Mentor Studio
-
-Mentor Studio is the workspace for creating and managing AI mentors.
-
-Design it like a professional creation studio.
-
-Sections:
-
-* Mentor Identity
-* Personality
-* Knowledge
-* Teaching Style
-* Goals
-* Rules
-* Conversation Examples
-* Preview
-* Analytics
-
-Use a split-screen interface where appropriate:
-
-```text
-┌──────────────┬───────────────────────┐
-│ Configuration│                       │
-│              │   Mentor Preview      │
-│ Personality  │                       │
-│ Knowledge    │   AI conversation      │
-│ Goals        │                       │
-│ Rules        │                       │
-│              │                       │
-└──────────────┴───────────────────────┘
-```
-
-Mentor creation should feel simple enough for a teacher.
-
----
-
-# 14. Parent Copilot
-
-Parent Copilot should prioritize clarity and trust.
-
-Parents should be able to understand:
-
-* Learning progress
-* Strengths
-* Areas needing attention
-* Attendance/activity
-* Learning habits
-* Upcoming assignments
-* AI recommendations
-
-Avoid overwhelming parents with raw technical analytics.
-
-Instead of:
-
-> "Student completed 87.43% of adaptive learning objectives."
-
-Prefer:
-
-> "Your child is making strong progress in Mathematics."
-
-Use clear summaries with optional detailed views.
-
----
-
-# 15. Teacher Copilot
-
-Teacher Copilot should prioritize productivity.
-
-Features may include:
-
-* Lesson planning
-* Assignment generation
-* Quiz creation
-* Student insights
-* Classroom analytics
-* Personalized learning recommendations
-* Feedback generation
-* Difficulty adjustment
-
-Use dense information only when useful.
-
-Teachers should be able to quickly:
-
-* Create
-* Review
-* Assign
-* Analyze
-* Give feedback
-
----
-
-# 16. Student Dashboard
-
-The dashboard should not feel like an analytics spreadsheet.
-
-Top section:
-
-> Good morning, [Name] 👋
-
-Then show:
-
-### Continue Learning
-
-The student's current learning activity.
-
-### Today's Goals
-
-Keep goals limited.
-
-Example:
-
-* Complete Mathematics lesson
-* Practice 10 Python questions
-* Read one chapter
-
-### Progress
-
-Show:
-
-* Current streak
-* XP
-* Skills
-* Course progress
-
-### AI Recommendations
-
-Personalized recommendations generated by the AI Tutor/Mentor.
-
-### Opportunities
-
-Show relevant:
-
-* Internships
-* Competitions
-* Scholarships
-* Fellowships
-* Projects
-
----
-
-# 17. Planet / Space Learning Theme
-
-The platform may use a subtle **space exploration theme** to make learning feel like discovery.
-
-Possible concepts:
-
-* Subjects = Planets
-* Chapters = Moons
-* Skills = Stars
-* Completed lessons = Explored regions
-* Learning paths = Missions
-* Achievements = Badges
-* AI Mentor = Guide
-
-Example:
-
-```text
-        ✦ Mathematics
-             🪐
-       Explore Algebra
-
-   ───────────────────
-
-      Your Mission
-      ███████░░░ 70%
-
-        [Continue]
-```
-
-Keep the space theme subtle.
-
-Do not turn every screen into a cartoon.
-
-The core UI should remain professional.
-
----
-
-# 18. Cards
-
-Cards should communicate one clear idea.
-
-Good:
-
-* Progress Card
-* Continue Learning Card
-* AI Recommendation Card
-* Assignment Card
-* Opportunity Card
-
-Avoid:
-
-* Nested cards
-* Excessive borders
-* Too many cards on one screen
-
-Each card should have:
-
-* Clear title
-* Short supporting information
-* Relevant action
-
----
-
-# 19. Buttons
-
-Primary button:
-
-Use the primary brand color.
-
-Examples:
-
-* Start Learning
-* Continue
-* Ask AI
-* Create Mentor
-* Generate Quiz
-
-Secondary button:
-
-Use subtle background or outline.
-
-Tertiary:
-
-Use text-only actions when appropriate.
-
-Buttons should clearly communicate what will happen.
-
-Avoid vague buttons such as:
-
-* Click Here
-* Submit
-* Proceed
-
-Prefer:
-
-* Start Quiz
-* Generate Lesson
-* View Progress
-
----
-
-# 20. Forms
-
-Forms should be simple.
-
-Use:
-
-* Clear labels
-* Helpful placeholders
-* Inline validation
-* Error messages
-* Logical grouping
-
-Never rely only on placeholder text as the field label.
-
----
-
-# 21. AI Loading States
-
-Never show a generic frozen screen while AI is processing.
-
-Use contextual messages such as:
-
-* "Thinking..."
-* "Building your quiz..."
-* "Finding examples..."
-* "Preparing your learning plan..."
-* "Analyzing your progress..."
-
-Use subtle animation.
-
-Do not make loading animations distracting.
-
----
-
-# 22. Empty States
-
-Empty states should guide users.
-
-Bad:
-
-> No data.
-
-Good:
-
-> You haven't started a learning path yet.
-
-> Start your first lesson and your progress will appear here.
-
-Include an appropriate action.
-
----
-
-# 23. Error States
-
-Errors should be friendly and actionable.
-
-Bad:
-
-> Error 500.
-
-Better:
-
-> Something went wrong while generating your lesson.
-
-> Try again.
-
-Never blame the user.
-
----
-
-# 24. Accessibility
-
-The application must prioritize accessibility.
-
-Requirements:
-
-* High color contrast
-* Keyboard navigation
-* Screen-reader-friendly labels
-* Visible focus states
-* Alt text for meaningful images
-* Captions for educational videos
-* Large enough touch targets
-* Do not communicate information through color alone
-
-AI-generated educational content should also be readable and understandable.
-
----
-
-# 25. Responsive Design
-
-Design mobile-first.
-
-The application must work well on:
-
-* Mobile phones
-* Tablets
-* Laptops
-* Desktop monitors
-
-Do not simply shrink desktop layouts.
-
-Reorganize content appropriately for smaller screens.
-
----
-
-# 26. Animations
-
-Use animations sparingly.
-
-Good uses:
-
-* Page transitions
-* AI response appearance
-* Progress updates
-* Achievement celebrations
-* Hover states
-* Loading states
-
-Avoid:
-
-* Constant floating animations
-* Excessive particle effects
-* Long transitions
-* Distracting backgrounds
-
-Animation duration should generally be:
-
-`150–300ms`
-
----
-
-# 27. AI Conversation Design
-
-AI responses should be:
-
-* Clear
-* Conversational
-* Structured
-* Age-appropriate
-* Context-aware
-
-Prefer:
-
-```text
-Explanation
-
-Example
-
-Try it yourself
-
-Need a hint?
-```
-
-over large walls of text.
-
-The AI should encourage students to think rather than immediately giving answers when educationally appropriate.
-
----
-
-# 28. Gamification
-
-Use gamification carefully.
-
-Possible elements:
-
-* XP
-* Streaks
-* Levels
-* Badges
-* Missions
-* Skill trees
-* Learning milestones
-
-Do not reward meaningless clicking.
-
-Rewards should be connected to genuine learning behavior.
-
----
-
-# 29. Notifications
-
-Notifications should be:
-
-* Useful
-* Timely
-* Relevant
-* Non-intrusive
-
-Examples:
-
-> Your Mathematics assignment is due tomorrow.
-
-> You've completed your weekly learning goal 🎉
-
-Avoid excessive notification badges.
-
----
-
-# 30. Data Visualization
-
-Use simple visualizations.
-
-Recommended:
-
-* Progress bars
-* Line charts
-* Bar charts
-* Skill maps
-* Completion rings
-
-Avoid complicated charts unless they provide meaningful insight.
-
-Teachers may receive more detailed analytics than students.
-
-Parents should receive simplified summaries.
-
----
-
-# 31. Content Hierarchy
-
-Every screen should have one primary goal.
-
-Use:
-
-1. Page title
-2. Main action
-3. Important information
-4. Supporting information
-5. Secondary actions
-
-Do not give every element equal visual importance.
-
----
-
-# 32. Dark Mode
-
-Dark mode should be fully supported.
-
-Do not simply invert colors.
-
-Use dark surfaces and maintain appropriate contrast.
-
-Avoid pure black backgrounds when possible.
-
-Recommended base:
-
-`#0F172A`
-
----
-
-# 33. Design Don'ts
+**Alive. Dreamy. Playful. Magical. Premium. Warm.**
 
 Never:
 
-* Use excessive gradients
-* Overload dashboards
-* Use tiny text
-* Create confusing navigation
-* Use too many colors
-* Use giant paragraphs
-* Add unnecessary animations
-* Make AI responses feel robotic
-* Hide important actions
-* Use inconsistent spacing
-* Create components with different visual styles for the same purpose
-* Sacrifice usability for visual effects
+**Static. Flat. Corporate. Boring. Cold.**
 
 ---
 
-# 34. Design Consistency
+## 1. The Vibe
 
-All new features must reuse existing:
+EduVerse lives in a **moonlit galaxy**. Deep violet-black space, a glowing moon, drifting stars, shooting stars, floating sparkles. A friendly animated buddy is your guide. Everything floats, glows, breathes, and reacts.
 
-* Colors
-* Typography
-* Spacing
-* Buttons
-* Cards
-* Inputs
-* Navigation
-* Modal styles
-* AI interaction patterns
-
-Do not create a new visual style for every feature.
-
-Before creating a new component, check whether an existing component can be reused.
+Think: the wonder of a planetarium + the delight of a Pixar short + the warmth of a favorite teacher.
 
 ---
 
-# 35. AI Coding Agent Instructions
+## 2. Color System
 
-When modifying or creating UI:
+The palette is a **dreamy galaxy** — deep space backgrounds with luminous accents.
 
-1. Read this `DESIGN.md` first.
-2. Inspect existing components before creating new ones.
-3. Reuse existing design tokens.
-4. Maintain responsive behavior.
-5. Maintain accessibility.
-6. Do not introduce unnecessary dependencies.
-7. Do not redesign unrelated screens.
-8. Keep visual consistency across the application.
-9. Prefer reusable components.
-10. Test mobile and desktop layouts.
-11. Use the existing project architecture.
-12. If a design decision is unclear, choose the simplest option consistent with this document.
+### Background (the galaxy)
+The signature radial gradient, used on every main screen:
+```
+radial-gradient(ellipse at 70% 15%, #3B2E63 0%, #241B47 30%, #150F2E 60%, #0A0718 100%)
+```
+- Deep violet → indigo → near-black. Feels infinite and calm.
 
-When implementing AI features, prioritize:
+### Accent colors (the buddies & glow)
+| Purpose | Color | Use |
+|---|---|---|
+| Violet (primary) | `#A78BFA` | Luna, primary glow, main actions |
+| Green | `#34D399` | Ellie, success, "correct" |
+| Blue | `#60A5FA` | Pip, calm highlights |
+| Pink | `#F472B6` | playful accents, "My Buddy" |
+| Gold | `#FBBF24` | stars, the moon, rewards |
 
-**Learning value > visual effects.**
+Each buddy has an **accent** (vivid) + **soft** (pale) pair. Soft colors back the buddy avatars; accents drive glows, buttons, and rings.
 
-When implementing dashboards, prioritize:
+### Surfaces
+- **Glassmorphism everywhere:** `bg-white/10` + `backdrop-blur-xl` + `ring-1 ring-white/20`.
+- Cards are frosted glass floating in space — never solid flat boxes.
+- Text on space: white for headings, `violet-200` for secondary, `white/60` for hints.
 
-**Clarity > information density.**
-
-When implementing student experiences, prioritize:
-
-**Engagement + simplicity + curiosity.**
+### Rule
+Color should **glow and guide**. Accents point the eye to what's alive and tappable. The background stays dark so the glow pops.
 
 ---
 
-# 36. Design North Star
+## 3. Typography
 
-Every design decision should move the product toward this feeling:
+Two rounded, friendly fonts (via `next/font/google`):
 
-> **"This feels like my personal learning universe, and I always know what to do next."**
+- **Fredoka** — headings, buddy names, big moments. Rounded, warm, characterful. (`--font-fredoka`)
+- **Quicksand** — body, labels, chat. Clean and soft. (`--font-quicksand`)
 
-The product should feel:
+Rules:
+- Headings are **bold and generous** — this is a playful app, be confident.
+- Never small-and-cramped. Text breathes.
+- White headings with a subtle `drop-shadow` so they lift off the dark galaxy.
 
-**Smart.
-Human.
-Playful.
-Trustworthy.
-Personal.
-Simple.
-Beautiful.**
+---
 
-But never:
+## 4. Motion Principles (the heart of EduVerse)
 
-**Complicated.
-Corporate.
-Overwhelming.
-Distracting.
-Robotic.**
+Motion is the soul of this app. Five rules:
+
+### 4.1 Everything Breathes
+Nothing is perfectly still. Cards **float** gently (`floatCard`, ~4s ease-in-out). The buddy bobs. Sparkles drift. A static element feels dead here.
+
+### 4.2 Everything Arrives
+Elements never just appear — they **enter**. Cascade in from above (`dropIn`), pop with a bounce (`bounceIn`, spring easing `cubic-bezier(0.34,1.56,0.64,1)`), or scale up (`popIn`). Staggered delays (~0.08s apart) make groups feel choreographed.
+
+### 4.3 Everything Reacts
+Tap → `active:scale-95`. Correct answer → party poppers + glow. Buddy speaking → aura pulses, rings ripple, stars rise. The app responds to *everything* so it feels alive and aware.
+
+### 4.4 Celebrate Loudly
+Big moments deserve big motion: **party-popper bursts** from the corners, **badge-unlock** pop-ups with spring scale, confetti. Learning should *feel* rewarding.
+
+### 4.5 Enter AND Exit
+Transitions go both ways. The welcome screen cascades in, then **flies up and away** on exit. Screens should feel like you're traveling between them, not snapping.
+
+### Timing
+- Micro-interactions (taps): 150–250ms
+- Entrances: 400–900ms with spring easing
+- Ambient loops (float, twinkle, glow): 3–8s, infinite, ease-in-out
+- Celebrations: ~1–2s
+
+### The one guardrail
+Motion serves *delight and clarity*, never chaos. If two things fight for attention, calm one down. Alive ≠ noisy.
+
+---
+
+## 5. Signature Animations (the toolkit)
+
+These are EduVerse's house animations — reuse them everywhere:
+
+| Name | What it does | Where |
+|---|---|---|
+| `floatCard` | gentle up-down bob | cards, buddy, planets |
+| `bounceIn` | spring scale-in | cards appearing, badges |
+| `popIn` | scale + fade up | messages, screens |
+| `dropIn` / cascade | slides down from sky | welcome elements |
+| `flyUp` | lifts up & fades | welcome exit |
+| `twinkle` | stars fade in/out | background |
+| `shoot` | shooting star streak | background |
+| `moonGlow` | moon halo pulses | background moon |
+| `ring` | sound-wave rings ripple out | buddy while speaking |
+| `riseUp` | stars float up | buddy while speaking |
+| `popperBurst` | confetti bursts from corners | correct answers |
+| `badgePop` | spring scale + rotate | badge unlock |
+| `wBtnPulse` | soft pulsing halo | primary CTAs |
+
+---
+
+## 6. The Buddy (star of the show)
+
+The animated Lottie character is the emotional core. It must always feel **present and alive**:
+
+- **Idle:** floats gently, calm glow, slow animation.
+- **Speaking:** faster animation, aura brightens, **sound-wave rings** ripple out, **stars rise** around it.
+- **Big (200px+)** in the chat room — center stage, not a tiny corner icon.
+- Sits in a **soft-colored glowing orb** (`radial-gradient` of its soft color + white highlight), ringed in `white/30`.
+- A **speech bubble** shows its latest words with a little tail pointing at it — like it's really talking to you.
+
+The buddy is a character, not a chatbot avatar. Give it life.
+
+---
+
+## 7. Components
+
+### Cards
+- Frosted glass: `bg-white/10 backdrop-blur-xl ring-1 ring-white/20`.
+- Rounded generously: `rounded-[1.4rem]` to `rounded-[2rem]`.
+- Float gently, bounce in on load, `active:scale-95` on tap.
+- Hover (desktop): lift + brighten ring (`hover:-translate-y-2 hover:ring-white/50`).
+
+### Buttons
+- Primary: filled with an accent color, bold, `shadow-lg`, `active:scale-95`. CTAs get a `wBtnPulse` halo.
+- Secondary: glassy `bg-white/15 ring-1 ring-white/30 text-white`.
+- Always give tactile feedback + a tap sound.
+
+### Planet tiles (home base)
+- Big glowing orbs: `radial-gradient(circle at 38% 32%, #ffffff40, <color>)` with a colored `box-shadow` glow.
+- Float on a loop, staggered. Tap to "fly into" a room.
+
+### Pills (modes, subjects)
+- Rounded-full. Selected = solid white text-on-accent; unselected = glassy.
+- Subject bar scrolls sideways on mobile (no wrapping mess).
+
+---
+
+## 8. Sound (motion for the ears)
+
+Motion isn't only visual. Subtle Web-Audio tones (no files) reinforce every action:
+- **Tap** — soft triangle blip
+- **Reply** — gentle two-note chime
+- **Correct** — rising happy arpeggio
+- **Badge** — sparkly three-note flourish
+
+Sound + motion together = premium feel. Keep it gentle, never annoying. Respect the mute toggle.
+
+---
+
+## 9. Layout & Flow
+
+The journey is a series of *places* you travel between:
+
+```
+Welcome (cascade in → fly up)
+   ↓
+Pick your buddy
+   ↓
+🏠 Home Base  (planet tiles: Learn · Quiz · Homework · My Buddy · Badges)
+   ↓  (tap a planet → fly in)
+Immersive Room  (big buddy center stage, speech bubble, chat)
+```
+
+- **Mobile-first.** 2-column grids, big tap targets (44px+), sideways-scroll subject bar, sizes that scale up on desktop.
+- One clear focus per screen. The buddy or the current action is always the hero.
+- Generous spacing — let the galaxy breathe around content.
+
+---
+
+## 10. Rewards & Progress
+
+Learning should feel like an adventure with treasures:
+- ⭐ **Stars** earned for correct answers (saved to the database, follow you everywhere).
+- 🏅 **Badges** unlock at milestones (First Star → Galaxy Master), shown glowing vs locked.
+- Every unlock is a **motion moment** — pop-up, spring, sound, confetti.
+- Rewards tie to *real learning*, never meaningless taps. (Delightful, not manipulative.)
+
+---
+
+## 11. The AI Tutor Feel
+
+The tutor should feel like a real teacher, not a chatbot:
+- It **drives** the lesson — greets with a plan, teaches a step, checks understanding, moves forward itself.
+- **Fun and energetic** — cracks light, age-appropriate jokes when things drag.
+- **Adapts** to Kid / Teen / Adult (chosen at welcome) — playful for kids, deeper for adults.
+- Short replies (2–5 sentences) that always move things forward.
+
+Personality + motion + voice = it feels *alive*, which is the whole point.
+
+---
+
+## 12. Do / Don't
+
+**Do**
+- Make everything breathe, arrive, and react.
+- Lead the eye with glow and motion.
+- Celebrate learning loudly.
+- Keep the buddy alive and central.
+- Test every screen on a real phone.
+
+**Don't**
+- Ship a static, flat, or snappy-cut screen.
+- Let motion become chaotic or fight for attention.
+- Shrink the buddy into an afterthought.
+- Use flat solid boxes instead of glass.
+- Add motion with no meaning (motion should delight or clarify).
+
+---
+
+## 13. North Star (again, because it matters)
+
+Every design decision answers one question:
+
+> **"Does this make EduVerse feel more alive, more magical, and more delightful to learn in?"**
+
+If yes — ship it. If it makes things flatter, colder, or more boring — it's not EduVerse.
+
+*Build the galaxy. Make it breathe. 🌌*

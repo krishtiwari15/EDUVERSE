@@ -12,8 +12,9 @@ async function callGroq(messages) {
 }
 
 export async function POST(req) {
-  const { messages, mentor, grade, student, subject, mode, level } = await req.json();
+  const { messages, mentor, grade, student, studentName, subject, mode, level } = await req.json();
   const sql = neon(process.env.DATABASE_URL);
+  const name = studentName || student;
 
   let notes = "";
   if (student) {
@@ -21,7 +22,7 @@ export async function POST(req) {
     if (rows.length > 0) notes = rows[0].notes;
   }
 // Tutor senses the learner's level from how they write & what they ask
-  const audience = `You're an AI tutor for anyone — a child, teen, or adult. Pay attention to how ${student || "the learner"} writes and what they ask, and MATCH their level: simple and playful for young kids, clearer and more real-world for teens, efficient and deeper for adults. When unsure, start friendly and simple, then adjust as you learn about them.`;
+  const audience = `You're an AI tutor for anyone — a child, teen, or adult. Pay attention to how ${name || "the learner"} writes and what they ask, and MATCH their level: simple and playful for young kids, clearer and more real-world for teens, efficient and deeper for adults. When unsure, start friendly and simple, then adjust as you learn about them.`;
 
   // ===== FEATURE 1: Drive the lesson (not a chatbot) =====
   const modeRules = {
@@ -41,7 +42,8 @@ export async function POST(req) {
 - Celebrate effort loudly. Use a gentle emoji sometimes (🌟🚀😄) but don't overdo it.
 - Never lecture flatly. Sound like a real person who's excited to teach.`;
 
-  const system = `You are ${mentor.name} the ${mentor.role}, a fun, energetic, encouraging AI TUTOR for ${student || "your learner"}.
+  const system = `You are ${mentor.name} the ${mentor.role}, powered by the Oxidium Mind — the same caring, patient teaching intelligence behind every mentor on EduVerse. Every mentor looks and sounds different, but they all reason and teach from this one Oxidium Mind, so the quality of teaching never depends on which buddy someone picks.
+You are a fun, energetic, encouraging AI TUTOR for ${name || "your learner"}.
 ${audience}
 ${mentor.personality ? `The learner designed your personality: "${mentor.personality}". Bring it to life!` : ""}
 Current subject: ${subject || "General"}.
@@ -52,7 +54,7 @@ ${modeRules[mode] || modeRules.Learn}
 YOUR PERSONALITY:
 ${personalityRules}
 
-${notes ? `What you remember about ${student}: ${notes}` : `First time meeting ${student || "this learner"} — be extra welcoming and set the tone!`}
+${notes ? `What you remember about ${name}: ${notes}` : `First time meeting ${name || "this learner"} — be extra welcoming and set the tone!`}
 
 ALWAYS:
 - Keep replies fairly short (2-5 sentences) and end by moving things forward (a question, the next step, or a nudge).
@@ -67,7 +69,7 @@ ALWAYS:
   const reply = await callGroq(chatMessages);
 
   if (student && messages.length % 6 === 0) {
-    const memoryPrompt = `What you knew about ${student}: "${notes}"
+    const memoryPrompt = `What you knew about ${name}: "${notes}"
 Latest message: "${messages[messages.length - 1]?.content}"
 Your reply: "${reply}"
 Update the memory notes in 1-3 short sentences: what they're learning, what's easy/hard, interests, level. Keep important old facts, add new ones. Reply with ONLY the updated notes.`;

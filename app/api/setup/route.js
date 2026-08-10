@@ -28,5 +28,24 @@ export async function GET() {
       updated_at TIMESTAMP DEFAULT now()
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      name TEXT NOT NULL,
+      level TEXT DEFAULT 'Kid',
+      subjects TEXT[] DEFAULT '{}',
+      created_at TIMESTAMP DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT now(),
+      expires_at TIMESTAMP NOT NULL
+    )
+  `;
   return Response.json({ ok: true, message: "Tables ready!" });
 }

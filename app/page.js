@@ -1,7 +1,9 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import Welcome from "./welcome";
+import Login from "./login";
+import Preferences from "./preferences";
+import { mentorAvatar } from "@/lib/avatar";
 
 const MENTORS = {
   nova: { name: "Luna", role: "Dreamer", emoji: "🌙", accent: "#A78BFA", soft: "#EDE9FE", tagline: "Let's explore the stars and discover cool things!" },
@@ -54,9 +56,21 @@ function GalaxyBackground() {
   );
 }
 
+function MentorAvatar({ mentor, size = 56 }) {
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <img src={mentorAvatar(mentor.name)} alt={mentor.name} className="w-full h-full rounded-2xl" style={{ background: mentor.soft }} />
+      <div className="absolute -bottom-1 -right-1 rounded-full flex items-center justify-center ring-2 ring-[#241B47]"
+        style={{ width: size * 0.42, height: size * 0.42, fontSize: size * 0.24, background: mentor.soft }}>
+        {mentor.emoji}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [mentor, setMentor] = useState(null);
-  const [welcomed, setWelcomed] = useState(false);
+  const [authUser, setAuthUser] = useState(undefined); // undefined = checking, null = logged out
   const [building, setBuilding] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [room, setRoom] = useState("home");
@@ -85,6 +99,27 @@ export default function Home() {
   const scrollRef = useRef(null);
 
   const lastReply = [...messages].reverse().find((m) => m.role === "assistant")?.content || "";
+  const displayName = authUser?.name || student;
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user) {
+          setAuthUser(d.user);
+          const key = String(d.user.id);
+          setStudent(key);
+          setLevel(d.user.level || "Kid");
+          if (d.user.subjects?.length) setSubject(d.user.subjects[0]);
+          loadMentors(key);
+          loadStars(key);
+        } else {
+          setAuthUser(null);
+        }
+      })
+      .catch(() => setAuthUser(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 999999, behavior: "smooth" }); }, [messages, loading]);
 
@@ -219,6 +254,17 @@ export default function Home() {
     } catch {}
   }
 
+  async function logout() {
+    sfx.tap();
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+    setAuthUser(null);
+    setMentor(null);
+    setMessages([]);
+    setSavedMentors([]);
+    setStudent("");
+    setStars(0);
+  }
+
   function start(m) {
     sfx.tap();
     setMentor(m);
@@ -262,7 +308,7 @@ export default function Home() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, mentor, student, subject, mode, level }),
+        body: JSON.stringify({ messages: next, mentor, student, studentName: displayName, subject, mode, level }),
       });
       const data = await res.json();
       let reply = data.reply || "Let's try that again — say it once more?";
@@ -355,9 +401,35 @@ export default function Home() {
     </button>
   );
 
-  // ---------- Welcome ----------
-  if (!welcomed) {
-    return <Welcome onStart={(nm, lvl) => { setStudent(nm); setLevel(lvl || "Kid"); loadMentors(nm); loadStars(nm); setWelcomed(true); }} />;
+  // ---------- Auth ----------
+  if (authUser === undefined) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center" style={galaxyBg}>
+        <div className="text-4xl animate-bounce">🌙</div>
+      </div>
+    );
+  }
+  if (authUser === null) {
+    return (
+      <Login
+        onAuth={(user) => {
+          setAuthUser(user);
+          const key = String(user.id);
+          setStudent(key);
+          setLevel(user.level || "Kid");
+          loadMentors(key);
+          loadStars(key);
+        }}
+      />
+    );
+  }
+  if (!authUser.subjects || authUser.subjects.length === 0) {
+    return (
+      <Preferences
+        user={authUser}
+        onDone={(updatedUser) => { setAuthUser(updatedUser); setSubject(updatedUser.subjects[0]); }}
+      />
+    );
   }
 
   // ---------- Badges screen ----------
@@ -403,10 +475,10 @@ export default function Home() {
           <button onClick={() => { sfx.tap(); setBuilding(false); }} className="text-white/80 hover:text-white mb-3 font-semibold">← Back</button>
           <div className="bg-white/10 backdrop-blur-xl rounded-[1.75rem] p-5 sm:p-6 shadow-2xl ring-1 ring-white/20">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-3xl bounce-in" style={{ background: c.soft }}>{cEmoji}</div>
+              <div className="bounce-in"><MentorAvatar mentor={{ name: cName || "Your buddy", soft: c.soft, emoji: cEmoji }} size={56} /></div>
               <div>
                 <div className="font-title font-bold text-white text-lg">{cName || "Your buddy"}</div>
-                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: c.accent }}>Custom Buddy</div>
+                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: c.accent }}>Custom Buddy · Oxidium Mind</div>
               </div>
             </div>
             <label className="text-sm font-bold text-white/80">Name</label>
@@ -423,7 +495,7 @@ export default function Home() {
                 <button key={i} onClick={() => { sfx.tap(); setCColor(i); }} className={`w-11 h-11 rounded-full transition ${cColor === i ? "ring-2 ring-offset-2 ring-offset-transparent ring-white scale-105" : ""}`} style={{ background: col.accent }} />
               ))}
             </div>
-            <label className="text-sm font-bold text-white/80">Describe your buddy's personality</label>
+            <label className="text-sm font-bold text-white/80">Describe your buddy&apos;s personality</label>
             <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={3} placeholder="e.g. A funny robot who loves space and tells silly jokes!" className="w-full mt-1 mb-5 px-4 py-3 rounded-2xl bg-white/90 outline-none text-slate-700 text-base resize-none focus:ring-4 focus:ring-violet-400/50 transition" />
             <button onClick={createMentor} disabled={!cName.trim()} className="w-full py-3.5 rounded-2xl font-bold text-white text-base disabled:opacity-40 shadow-lg active:scale-95 transition" style={{ background: c.accent }}>Create my buddy ✨</button>
           </div>
@@ -438,16 +510,19 @@ export default function Home() {
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6" style={galaxyBg}>
         {styleBlock}<GalaxyBackground /><Confetti /><BadgePopup />
         <div className="relative z-10 w-full max-w-3xl pop-in py-6">
-          <div className="flex justify-end mb-2"><StarChip /></div>
+          <div className="flex justify-between items-center mb-2">
+            <button onClick={logout} className="text-violet-200/70 hover:text-white text-xs font-semibold transition">Log out</button>
+            <StarChip />
+          </div>
           <div className="text-center">
             <div className="text-4xl sm:text-5xl mb-2 float-card">🌙</div>
-            <h1 className="text-3xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight px-2">{student ? `Hi ${student}!` : "Pick your buddy!"}</h1>
-            <p className="text-violet-200 mt-2 font-medium text-sm sm:text-base px-4">Your AI tutor for anything — pick a buddy to begin.</p>
+            <h1 className="text-3xl sm:text-5xl font-bold text-white drop-shadow-lg tracking-tight px-2">{displayName ? `Hi ${displayName}!` : "Pick your buddy!"}</h1>
+            <p className="text-violet-200 mt-2 font-medium text-sm sm:text-base px-4">Every buddy shares one caring Oxidium Mind ✨ — pick one to begin.</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
             {Object.entries(MENTORS).map(([key, m], idx) => (
               <button key={key} onClick={() => start(m)} className="bounce-in text-left bg-white/10 backdrop-blur-xl rounded-[1.4rem] p-4 sm:p-5 shadow-xl ring-1 ring-white/20 active:scale-95 hover:ring-white/50 transition-all" style={{ animationDelay: `${idx * 0.08}s` }}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-3xl mb-3" style={{ background: m.soft }}>{m.emoji}</div>
+                <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
                 <div className="font-title font-bold text-white text-base sm:text-lg">{m.name}</div>
                 <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>{m.role}</div>
                 <p className="text-xs sm:text-sm text-violet-100/80 mt-1.5 leading-snug">{m.tagline}</p>
@@ -459,7 +534,7 @@ export default function Home() {
             </button>
             {savedMentors.map((m, i) => (
               <button key={"saved" + i} onClick={() => start(m)} className="bounce-in text-left bg-white/10 backdrop-blur-xl rounded-[1.4rem] p-4 sm:p-5 shadow-xl ring-1 ring-white/20 active:scale-95 transition-all">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-3xl mb-3" style={{ background: m.soft }}>{m.emoji}</div>
+                <div className="mb-3"><MentorAvatar mentor={m} size={56} /></div>
                 <div className="font-title font-bold text-white text-base sm:text-lg">{m.name}</div>
                 <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: m.accent }}>Your buddy</div>
                 <p className="text-xs sm:text-sm text-violet-100/80 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
@@ -492,7 +567,7 @@ export default function Home() {
             <div className="w-28 h-28 mx-auto rounded-full flex items-center justify-center shadow-2xl float-card ring-2 ring-white/30" style={{ background: mentor.soft }}>
               <DotLottieReact src={CHARACTER_URL} loop autoplay style={{ width: "82%", height: "82%" }} />
             </div>
-            <h1 className="font-title text-2xl sm:text-3xl font-bold text-white mt-3">Where to, {student || "explorer"}?</h1>
+            <h1 className="font-title text-2xl sm:text-3xl font-bold text-white mt-3">Where to, {displayName || "explorer"}?</h1>
             <p className="text-violet-200 text-sm mt-1">Tap a planet to begin ✨</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
