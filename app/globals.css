@@ -1,91 +1,76 @@
 @import "tailwindcss";
 
 /*
- * EduVerse design system — "moonlit galaxy," formalized.
- * Single source of truth for color, type, elevation, radius, and motion so
- * every screen reads as one product instead of each component re-declaring
- * its own hex values and easing curves. See DESIGN.md for the full rationale.
+ * EduVerse design system v2 — "Cinematic Void."
+ * Black stage, restrained silver/white Manrope type, white pill CTAs.
+ * No color accents anywhere — hierarchy comes from white/gray opacity and
+ * weight only, never hue. No glassmorphism/blur — flat, hairline-bordered
+ * surfaces instead. See DESIGN.md for the full rationale.
  */
 :root {
-  --background: #0a0718;
-  --foreground: #f5f3ff;
+  --background: #050505;
+  --foreground: #fafafa;
 
-  /* ---- Surface layers (the "space" the product sits in) ---- */
-  --color-void: #0a0718;
-  --color-nebula-1: #150f2e;
-  --color-nebula-2: #241b47;
-  --color-nebula-3: #3b2e63;
+  --ink: #fafafa;    /* primary text */
+  --muted: #a7a6a6;  /* secondary text */
+  --faint: #8b8a8a;  /* tertiary / eyebrow / disabled text */
+  --void: #050505;   /* page background */
 
-  /* ---- Accent system: two tones with distinct jobs, not one color
-     doing everything ---- */
-  --color-primary: #a78bfa;       /* brand + primary actions */
-  --color-primary-soft: #ede9fe;
-  --color-aurora: #5eead4;        /* AI / intelligence moments, progress */
-  --color-aurora-soft: #d1fae5;
-  --color-gold: #fbbf24;          /* achievement + reward only */
+  --surface-1: rgba(255, 255, 255, 0.035);
+  --surface-2: rgba(255, 255, 255, 0.05);
+  --surface-3: rgba(255, 255, 255, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-glass-strong: rgba(255, 255, 255, 0.22);
 
-  --color-ink: #f5f3ff;           /* primary text on dark surfaces */
-  --color-ink-muted: #c4b5fd;     /* secondary text on dark surfaces */
-  --color-ink-faint: rgba(245, 243, 255, 0.55);
+  --pill: #ffffff;
+  --pill-ink: #050505;
 
-  /* ---- Glass elevation tiers ---- */
-  --surface-1: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.1);
-  --surface-3: rgba(255, 255, 255, 0.15);
-  --border-glass: rgba(255, 255, 255, 0.18);
-  --border-glass-strong: rgba(255, 255, 255, 0.3);
-
-  /* ---- Radius scale ---- */
   --radius-sm: 0.75rem;
   --radius-md: 1.25rem;
   --radius-lg: 1.75rem;
   --radius-pill: 999px;
 
-  /* ---- Motion: a signature deceleration, not a different curve per
-     component. Durations tuned so nothing feels sluggish. ---- */
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-slow: 450ms;
 
-  --focus-ring: 0 0 0 3px rgba(167, 139, 250, 0.55);
+  --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.4);
 
-  --font-display: var(--font-display), sans-serif;
-  --font-body: var(--font-body), sans-serif;
-  --font-companion: var(--font-fredoka), sans-serif;
+  --font-body: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
-  --font-display: var(--font-display);
 }
 
 body {
-  background: var(--background);
+  background: var(--void);
   color: var(--foreground);
+  font-family: var(--font-body);
 }
 
 /* ---------------------------------------------------------------- */
-/* Typography scale — large, confident headlines; calm, legible body */
+/* Typography scale — one family, weight and size carry hierarchy   */
 /* ---------------------------------------------------------------- */
 .text-hero {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.05;
   font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
 }
 .text-display {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
   font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
 }
 .text-heading {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -97,28 +82,27 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.6875rem;
+  color: var(--faint);
 }
 .font-companion {
-  font-family: var(--font-companion);
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 /* ---------------------------------------------------------------- */
-/* Surfaces */
+/* Surfaces — flat, hairline-bordered cards. No blur.                */
+/* (Class names kept as glass-card/-elevated for continuity with the */
+/* Surface component's tier map — they're flat now, not glass.)      */
 /* ---------------------------------------------------------------- */
 .glass-card {
   background: var(--surface-2);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
 }
 .glass-card-elevated {
   background: var(--surface-3);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
   border: 1px solid var(--border-glass-strong);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
 }
 
 .focus-ring {
@@ -128,8 +112,16 @@ body {
   box-shadow: var(--focus-ring);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ---------------------------------------------------------------- */
-/* Respect prefers-reduced-motion globally */
+/* Respect prefers-reduced-motion globally                          */
 /* ---------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -140,4 +132,64 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------------------------------------------------------------- */
+/* Shared keyframes — ring pulses (voice states), rise/fade entrances,
+   celebration toast. Global so every screen can use them.          */
+/* ---------------------------------------------------------------- */
+@keyframes ring {
+  0% { transform: scale(0.7); opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes orbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes voidDriftA {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 4%) scale(1.08); }
+}
+@keyframes voidDriftB {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5%, -6%) scale(1.05); }
+}
+@keyframes holeSpinA {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes holeSpinB {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+@keyframes holeCore {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+@keyframes emberOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes fadeInScreen {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.screen-enter {
+  animation: fadeInScreen 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes tiltConfused {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-8deg); }
+  70% { transform: rotate(6deg); }
+}
+.float-card {
+  animation: floatCard 4s ease-in-out infinite;
 }

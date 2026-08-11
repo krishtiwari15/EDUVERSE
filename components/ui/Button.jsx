@@ -2,10 +2,9 @@
 import { motion } from "motion/react";
 
 const VARIANTS = {
-  primary: "text-violet-950 bg-gradient-to-r from-violet-200 to-indigo-200 shadow-[0_8px_30px_-8px_rgba(167,139,250,0.6)]",
-  aurora: "text-teal-950 bg-gradient-to-r from-teal-200 to-cyan-200 shadow-[0_8px_30px_-8px_rgba(94,234,212,0.5)]",
-  glass: "text-white glass-card border border-white/20 hover:bg-white/15",
-  ghost: "text-violet-200 hover:text-white",
+  primary: "text-[var(--pill-ink)] bg-[var(--pill)] hover:opacity-90",
+  glass: "text-white bg-white/5 border border-white/15 hover:bg-white/10",
+  ghost: "text-white/70 hover:text-white",
 };
 
 const SIZES = {
@@ -34,7 +33,7 @@ export default function Button({
     >
       <Tag
         disabled={disabled}
-        className={`focus-ring inline-flex items-center justify-center gap-2 font-semibold transition-shadow disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+        className={`focus-ring inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
         {...props}
       >
         {Icon && iconPosition === "left" && <Icon size={size === "sm" ? 16 : 18} strokeWidth={2.25} />}

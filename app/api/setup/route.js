@@ -47,5 +47,48 @@ export async function GET() {
       expires_at TIMESTAMP NOT NULL
     )
   `;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings JSONB DEFAULT '{}'`;
+
+  // ===== Obsidian Mind: knowledge graph tables =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS concepts (
+      id SERIAL PRIMARY KEY,
+      subject TEXT NOT NULL,
+      name TEXT NOT NULL,
+      related TEXT[] DEFAULT '{}',
+      UNIQUE(subject, name)
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS student_concept (
+      student TEXT NOT NULL,
+      concept_id INTEGER NOT NULL REFERENCES concepts(id) ON DELETE CASCADE,
+      mastery REAL DEFAULT 0,
+      last_reviewed TIMESTAMPTZ DEFAULT now(),
+      mistakes TEXT[] DEFAULT '{}',
+      PRIMARY KEY (student, concept_id)
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS learning_events (
+      id SERIAL PRIMARY KEY,
+      student TEXT NOT NULL,
+      subject TEXT,
+      concept TEXT,
+      kind TEXT NOT NULL,
+      detail TEXT,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS goals (
+      id SERIAL PRIMARY KEY,
+      student TEXT NOT NULL,
+      text TEXT NOT NULL,
+      status TEXT DEFAULT 'active',
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+
   return Response.json({ ok: true, message: "Tables ready!" });
 }
