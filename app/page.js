@@ -319,7 +319,7 @@ export default function Home() {
   // ---------- Auth ----------
   if (authUser === undefined) {
     return (
-      <div className="relative min-h-app flex items-center justify-center bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center screen-enter">
         <VoidBackdrop />
         <BrandMark className="w-6 h-9 animate-pulse" />
       </div>
@@ -364,7 +364,7 @@ export default function Home() {
     const prevNeed = [0, ...BADGES.map((b) => b.need)][BADGES.findIndex((b) => b === nextBadge)] || 0;
     const pct = nextBadge ? Math.round(((stars - prevNeed) / (nextBadge.need - prevNeed)) * 100) : 100;
     return (
-      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad screen-enter">
         <VoidBackdrop />
         <div className="relative z-10 w-full max-w-md">
           <button onClick={() => { sfx.tap(); setShowBadges(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
@@ -408,7 +408,7 @@ export default function Home() {
   if (building) {
     const previewMentor = { name: cName || "Your buddy" };
     return (
-      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad screen-enter">
         <VoidBackdrop />
         <div className="relative z-10 max-w-4xl mx-auto py-4">
           <button onClick={() => { sfx.tap(); setBuilding(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
@@ -455,7 +455,7 @@ export default function Home() {
   // ---------- Picker screen ----------
   if (!mentor) {
     return (
-      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad screen-enter">
         <VoidBackdrop />
         <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
         <div className="relative z-10 w-full max-w-3xl py-6">
@@ -506,7 +506,7 @@ export default function Home() {
   // ---------- AI Mentor companion, focus session, Obsidian Mind, settings ----------
   if (room === "companion") {
     return (
-      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad screen-enter">
         <VoidBackdrop />
         <Companion
           mentor={mentor}
@@ -522,7 +522,7 @@ export default function Home() {
   }
   if (room === "focus") {
     return (
-      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad screen-enter">
         <VoidBackdrop />
         <Focus mentor={mentor} muted={muted} onBack={() => { sfx.tap(); setRoom("home"); }} onComplete={() => { celebrate("Session complete!"); addStar(); }} />
       </div>
@@ -530,7 +530,7 @@ export default function Home() {
   }
   if (room === "mind") {
     return (
-      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad screen-enter">
         <VoidBackdrop />
         <Mind student={student} displayName={displayName} onBack={() => { sfx.tap(); setRoom("home"); }} />
       </div>
@@ -538,7 +538,7 @@ export default function Home() {
   }
   if (room === "settings") {
     return (
-      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad screen-enter">
         <VoidBackdrop />
         <SettingsScreen student={student} onBack={() => { sfx.tap(); setRoom("home"); }} />
       </div>
@@ -556,7 +556,7 @@ export default function Home() {
       { icon: Award, label: "Progress", desc: `${stars} stars`, onClick: openBadges },
     ];
     return (
-      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad screen-enter">
         <VoidBackdrop />
         <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
         <Toast message={toast} />
@@ -660,7 +660,7 @@ export default function Home() {
   // ---------- IMMERSIVE CHAT ROOM ----------
   const showStarters = messages.length <= 1 && !loading;
   return (
-    <div className="relative min-h-app flex flex-col overflow-hidden bg-[var(--void)] screen-enter">
+    <div className="relative min-h-app flex flex-col overflow-hidden screen-enter">
       <VoidBackdrop />
       <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
       <Toast message={toast} />
