@@ -12,6 +12,12 @@ const LEVELS = [
   { key: "Adult", label: "Adult" },
 ];
 
+const ROLES = [
+  { key: "student", label: "Student" },
+  { key: "parent", label: "Parent" },
+  { key: "teacher", label: "Teacher" },
+];
+
 const HIGHLIGHTS = [
   { icon: GraduationCap, text: "An AI tutor that teaches like a real person — not a search engine" },
   { icon: Compass, text: "A mentor that remembers your journey, not just your last question" },
@@ -24,6 +30,7 @@ export default function Login({ onAuth, initialMode, onBack }) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [level, setLevel] = useState("Kid");
+  const [role, setRole] = useState("student");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -33,7 +40,7 @@ export default function Login({ onAuth, initialMode, onBack }) {
     setError("");
     setBusy(true);
     try {
-      const body = mode === "signup" ? { email, password, name, level } : { email, password };
+      const body = mode === "signup" ? { email, password, name, level, role } : { email, password };
       const res = await fetch(`/api/auth/${mode === "signup" ? "signup" : "login"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,6 +141,20 @@ export default function Login({ onAuth, initialMode, onBack }) {
               </label>
 
               {mode === "signup" && (
+                <div className="pt-1">
+                  <p className="text-eyebrow mb-2">I am a</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {ROLES.map((r) => (
+                      <button key={r.key} type="button" onClick={() => setRole(r.key)} aria-pressed={role === r.key}
+                        className={`focus-ring py-2.5 rounded-xl text-sm font-semibold transition ${role === r.key ? "bg-white text-[var(--pill-ink)]" : "bg-white/5 text-white/70 ring-1 ring-white/15"}`}>
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {mode === "signup" && role === "student" && (
                 <div className="pt-1">
                   <p className="text-eyebrow mb-2">Who&apos;s learning</p>
                   <div className="grid grid-cols-3 gap-2">

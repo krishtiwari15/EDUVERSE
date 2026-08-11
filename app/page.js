@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Home as HomeIcon, ArrowLeft, LogOut, Award, Lock, Mic, MicOff, Volume2, VolumeX,
-  Send, Sparkles, PencilLine, Backpack, Users, GraduationCap, Compass,
+  Send, Sparkles, PencilLine, Backpack, Users, Compass,
   BarChart3, Play, Brain, Settings as SettingsIcon, Star,
 } from "lucide-react";
 import Landing from "./landing";
@@ -13,6 +13,8 @@ import Companion from "./companion";
 import Focus from "./focus";
 import Mind from "./mind";
 import SettingsScreen from "./settings";
+import ParentDashboard from "./parent";
+import TeacherDashboard from "./teacher";
 import { Button, Surface, Badge, ProgressBar, Section, Reveal, RevealGroup, RevealItem } from "@/components/ui";
 import AIAvatar from "@/components/mentor/AIAvatar";
 import BrandMark from "@/components/BrandMark";
@@ -39,12 +41,10 @@ const STARTER_PROMPTS = {
   Quiz: ["I'm ready, ask me!", "Make it a bit harder", "Give me a hint"],
   Homework: ["Here's my problem", "I'm stuck on step one", "Check my answer"],
   Companion: ["How's it going?", "I need help getting started", "Just checking in"],
+  Opportunities: ["What could I explore in this?", "What might fit my interests?", "What's a good next step?"],
 };
 
 const ROADMAP = [
-  { icon: Users, title: "Parent Copilot", desc: "Plain-language updates on your child's progress." },
-  { icon: GraduationCap, title: "Teacher Copilot", desc: "AI-assisted lesson & assignment creation." },
-  { icon: Compass, title: "Opportunities", desc: "Scholarships, competitions & programs, matched to you." },
   { icon: BarChart3, title: "Deep Analytics", desc: "The full story behind your learning streak." },
 ];
 
@@ -107,9 +107,11 @@ export default function Home() {
   const [showBadges, setShowBadges] = useState(false);
   const [room, setRoom] = useState("home");
   const [savedMentors, setSavedMentors] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [student, setStudent] = useState("");
   const [level, setLevel] = useState("Kid");
   const [subject, setSubject] = useState("General");
+  const [learnInput, setLearnInput] = useState("");
   const [mode, setMode] = useState("Learn");
   const [muted, setMuted] = useState(false);
   const [autoListenPending, setAutoListenPending] = useState(false);
@@ -138,6 +140,7 @@ export default function Home() {
           if (d.user.subjects?.length) setSubject(d.user.subjects[0]);
           loadMentors(key);
           loadStars(key);
+          if (d.user.role === "student" || !d.user.role) loadAssignments();
         } else {
           setAuthUser(null);
         }
@@ -228,6 +231,19 @@ export default function Home() {
     } catch {}
   }
 
+  async function loadAssignments() {
+    try {
+      const r = await fetch("/api/assignment");
+      const d = await r.json();
+      setAssignments(d.assignments || []);
+    } catch {}
+  }
+
+  async function completeAssignment(id) {
+    setAssignments((prev) => prev.map((a) => (a.id === id ? { ...a, completed: true } : a)));
+    try { await fetch("/api/assignment/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assignmentId: id }) }); } catch {}
+  }
+
   async function logout() {
     sfx.tap();
     try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
@@ -246,15 +262,18 @@ export default function Home() {
     setRoom("home");
   }
 
-  function enterRoom(nm) {
+  function enterRoom(nm, subjectOverride) {
     sfx.tap();
+    const activeSubject = subjectOverride || subject;
+    if (subjectOverride) setSubject(subjectOverride);
     setMode(nm);
     setRoom("chat");
     setMessages([]);
-    const note = nm === "Quiz" ? `Let's start a ${subject} quiz! Ask me the first question.`
+    const note = nm === "Quiz" ? `Let's start a ${activeSubject} quiz! Ask me the first question.`
       : nm === "Homework" ? `Can you help me with my homework?`
       : nm === "Companion" ? `Hey, I'm here to chat and check in.`
-      : `Let's learn something new in ${subject}!`;
+      : nm === "Opportunities" ? `I'd like to explore opportunities that might fit me.`
+      : `I want to learn ${activeSubject}.`;
     sendText(note, []);
   }
 
@@ -348,6 +367,12 @@ export default function Home() {
         }}
       />
     );
+  }
+  if (authUser.role === "parent") {
+    return <ParentDashboard user={authUser} onLogout={logout} />;
+  }
+  if (authUser.role === "teacher") {
+    return <TeacherDashboard user={authUser} onLogout={logout} />;
   }
   if (!authUser.subjects || authUser.subjects.length === 0) {
     return (
@@ -554,6 +579,7 @@ export default function Home() {
       { icon: Backpack, label: "Homework", desc: "Get unstuck", onClick: () => enterRoom("Homework") },
       { icon: Users, label: "My Buddy", desc: "Switch or create", onClick: () => { sfx.tap(); setMentor(null); } },
       { icon: Award, label: "Progress", desc: `${stars} stars`, onClick: openBadges },
+      { icon: Compass, label: "Opportunities", desc: "Explore paths", onClick: () => enterRoom("Opportunities") },
     ];
     return (
       <div className="relative min-h-app safe-pad screen-enter">
@@ -592,7 +618,7 @@ export default function Home() {
           </Reveal>
 
           {/* Quick actions */}
-          <RevealGroup className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4" stagger={0.05}>
+          <RevealGroup className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4" stagger={0.05}>
             {quickActions.map((a) => (
               <RevealItem key={a.label}>
                 <button onClick={a.onClick} aria-label={`${a.label} — ${a.desc}`} className="focus-ring w-full glass-card p-4 flex flex-col items-center gap-2 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95 transition-all text-center">
@@ -629,13 +655,56 @@ export default function Home() {
             <Section eyebrow="Explore" title="Subjects" className="mt-8">
               <div className="flex gap-2 flex-wrap">
                 {SUBJECTS.map((s) => (
-                  <button key={s} onClick={() => { setSubject(s); enterRoom("Learn"); }} className={`focus-ring px-4 py-2 rounded-[var(--radius-pill)] text-sm font-semibold transition ${subject === s ? "bg-white text-[var(--pill-ink)]" : "glass-card text-white hover:bg-white/10"}`}>
+                  <button key={s} onClick={() => enterRoom("Learn", s)} className={`focus-ring px-4 py-2 rounded-[var(--radius-pill)] text-sm font-semibold transition ${subject === s ? "bg-white text-[var(--pill-ink)]" : "glass-card text-white hover:bg-white/10"}`}>
                     {s}
                   </button>
                 ))}
               </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const topic = learnInput.trim();
+                  if (!topic) return;
+                  setLearnInput("");
+                  enterRoom("Learn", topic);
+                }}
+                className="flex gap-2 mt-3"
+              >
+                <input
+                  value={learnInput}
+                  onChange={(e) => setLearnInput(e.target.value)}
+                  placeholder="Or type anything — 'how money works', 'cooking', 'the universe'…"
+                  aria-label="What do you want to learn?"
+                  className="focus-ring flex-1 px-4 py-2.5 rounded-[var(--radius-pill)] bg-white/90 text-slate-800 text-sm placeholder:text-slate-400"
+                />
+                <button type="submit" disabled={!learnInput.trim()} aria-label="Start learning" className="focus-ring w-10 h-10 rounded-full flex items-center justify-center bg-white text-[var(--pill-ink)] disabled:opacity-40 shrink-0 transition active:scale-95">
+                  <Send size={15} strokeWidth={2.25} />
+                </button>
+              </form>
             </Section>
           </Reveal>
+
+          {assignments.length > 0 && (
+            <Reveal delay={0.09}>
+              <Section eyebrow="From your class" title="Assignments" className="mt-8">
+                <div className="space-y-2">
+                  {assignments.map((a) => (
+                    <Surface key={a.id} tier={2} className={`p-4 flex items-center justify-between gap-3 ${a.completed ? "opacity-50" : ""}`}>
+                      <div className="min-w-0">
+                        <div className="text-white text-sm font-semibold truncate">{a.title}</div>
+                        <div className="text-white/45 text-xs mt-0.5">{a.class_name}{a.due_date ? ` · due ${a.due_date}` : ""}</div>
+                      </div>
+                      {a.completed ? (
+                        <Badge tone="neutral" className="shrink-0">Done</Badge>
+                      ) : (
+                        <Button variant="glass" size="sm" onClick={() => completeAssignment(a.id)} className="shrink-0">Mark done</Button>
+                      )}
+                    </Surface>
+                  ))}
+                </div>
+              </Section>
+            </Reveal>
+          )}
 
           {/* Roadmap teasers */}
           <Reveal delay={0.1}>

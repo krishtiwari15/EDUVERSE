@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Camera, Mic, MessageSquare, BrainCircuit, Sparkles, BellRing, Trash2 } from "lucide-react";
+import { ArrowLeft, Camera, Mic, MessageSquare, BrainCircuit, Sparkles, BellRing, Trash2, UserPlus, School, Copy, Check, ArrowRight } from "lucide-react";
 import { Button, Surface, Reveal } from "@/components/ui";
 
 function Toggle({ on, onChange, label }) {
@@ -30,6 +30,12 @@ export default function Settings({ student, onBack }) {
   const [settings, setSettings] = useState(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [parentCode, setParentCode] = useState(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [classCode, setClassCode] = useState("");
+  const [joinBusy, setJoinBusy] = useState(false);
+  const [joinMessage, setJoinMessage] = useState("");
 
   useEffect(() => {
     if (!student) return;
@@ -40,6 +46,41 @@ export default function Settings({ student, onBack }) {
     const next = { ...settings, [key]: value };
     setSettings(next);
     fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ student, settings: next }) }).catch(() => {});
+  }
+
+  async function generateParentCode() {
+    if (generatingCode) return;
+    setGeneratingCode(true);
+    try {
+      const res = await fetch("/api/parent/code", { method: "POST" });
+      const d = await res.json();
+      if (d.ok) setParentCode(d.code);
+    } catch {} finally { setGeneratingCode(false); }
+  }
+
+  function copyParentCode() {
+    navigator.clipboard?.writeText(parentCode).then(() => { setCodeCopied(true); setTimeout(() => setCodeCopied(false), 1500); });
+  }
+
+  async function joinClass(e) {
+    e.preventDefault();
+    if (!classCode.trim() || joinBusy) return;
+    setJoinBusy(true);
+    setJoinMessage("");
+    try {
+      const res = await fetch("/api/class/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: classCode.trim() }),
+      });
+      const d = await res.json();
+      setJoinMessage(d.ok ? `Joined ${d.className}!` : (d.error || "Something went wrong."));
+      if (d.ok) setClassCode("");
+    } catch {
+      setJoinMessage("Couldn't reach the server. Try again.");
+    } finally {
+      setJoinBusy(false);
+    }
   }
 
   async function deleteMemory() {
@@ -76,6 +117,44 @@ export default function Settings({ student, onBack }) {
           ))}
         </Surface>
       )}
+
+      <Surface tier={2} className="mt-4 p-4">
+        <div className="flex items-start gap-3">
+          <UserPlus size={18} className="text-white/60 mt-0.5 shrink-0" strokeWidth={1.75} />
+          <div className="flex-1">
+            <div className="text-white text-sm font-semibold">Invite a parent</div>
+            <p className="text-white/45 text-xs mt-0.5 leading-relaxed">Generate a code so a parent can link their account to yours and see plain-language progress updates — never your login details.</p>
+            {parentCode ? (
+              <div className="flex items-center gap-2 mt-2.5 text-sm">
+                <span className="font-mono font-bold text-white tracking-widest">{parentCode}</span>
+                <button onClick={copyParentCode} className="focus-ring text-white/50 hover:text-white transition" aria-label="Copy code">
+                  {codeCopied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+                <span className="text-white/35 text-xs">Expires in 7 days</span>
+              </div>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={generateParentCode} disabled={generatingCode} className="mt-2 !px-0">
+                {generatingCode ? "Generating…" : "Generate a code"}
+              </Button>
+            )}
+          </div>
+        </div>
+      </Surface>
+
+      <Surface tier={2} className="mt-4 p-4">
+        <div className="flex items-start gap-3">
+          <School size={18} className="text-white/60 mt-0.5 shrink-0" strokeWidth={1.75} />
+          <div className="flex-1">
+            <div className="text-white text-sm font-semibold">Join a class</div>
+            <p className="text-white/45 text-xs mt-0.5 leading-relaxed mb-2.5">Enter the code your teacher shared to see their assignments on your dashboard.</p>
+            <form onSubmit={joinClass} className="flex gap-2">
+              <input value={classCode} onChange={(e) => setClassCode(e.target.value.toUpperCase())} placeholder="Class code" maxLength={6} className="focus-ring flex-1 px-3.5 py-2 rounded-lg bg-white/90 text-slate-800 text-sm tracking-widest font-semibold placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400" />
+              <Button type="submit" variant="ghost" size="sm" icon={ArrowRight} iconPosition="right" disabled={joinBusy || !classCode.trim()}>{joinBusy ? "…" : "Join"}</Button>
+            </form>
+            {joinMessage && <p className="text-white/60 text-xs mt-2">{joinMessage}</p>}
+          </div>
+        </div>
+      </Surface>
 
       <Surface tier={2} className="mt-4 p-4">
         <div className="flex items-start gap-3">

@@ -14,8 +14,9 @@ Product areas (existing today marked ✅, roadmap marked 🔜):
 - ✅ AI Mentor companion — persistent, voice-first companion (talk/type, interruptible conversation, Focus Sessions with an optional privacy-first camera presence signal)
 - ✅ Obsidian Mind knowledge graph ("My Mind") — concepts, mastery, and mistakes built from real conversations
 - ✅ Privacy & mentor settings — camera/mic/voice-history/learning-memory/personalization toggles, plus "delete my AI memory"
-- 🔜 Parent Copilot, Teacher Copilot
-- 🔜 Opportunities (internships, competitions, scholarships)
+- ✅ Parent Copilot — real parent accounts, code-based linking to a student (no email invites, no fabricated family data), plain-language progress summaries generated from real Obsidian Mind data
+- ✅ Teacher Copilot — real teacher accounts, classes with join codes, AI-generated assignments (binary complete/not-complete, not a full gradebook)
+- ✅ Opportunities — an AI conversation mode exploring paths/competitions/programs grounded in the learner's real profile; deliberately never states specific deadlines/amounts as verified fact
 - 🔜 Formal Progress & Analytics
 
 Roadmap items appear in the product as clearly labeled "coming soon" moments, never as fabricated data pretending to be real.

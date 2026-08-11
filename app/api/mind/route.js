@@ -4,7 +4,7 @@ import { neon } from "@neondatabase/serverless";
 // real conversations, joined with mastery/mistakes, plus their active goals.
 export async function GET(req) {
   const student = new URL(req.url).searchParams.get("student");
-  if (!student) return Response.json({ concepts: [], goals: [] });
+  if (!student) return Response.json({ concepts: [], goals: [], profile: null, subjectKnowledge: [] });
   const sql = neon(process.env.DATABASE_URL);
   const concepts = await sql`
     SELECT c.id, c.subject, c.name, sc.mastery, sc.mistakes, sc.last_reviewed
@@ -13,7 +13,9 @@ export async function GET(req) {
     ORDER BY c.subject, sc.last_reviewed DESC
   `;
   const goals = await sql`SELECT id, text, status, created_at FROM goals WHERE student = ${student} AND status = 'active' ORDER BY created_at DESC`;
-  return Response.json({ concepts, goals });
+  const profileRows = await sql`SELECT primary_goal, why, interests FROM learner_profile WHERE student = ${student}`;
+  const subjectKnowledge = await sql`SELECT subject, level, difficulty FROM subject_knowledge WHERE student = ${student} ORDER BY updated_at DESC`;
+  return Response.json({ concepts, goals, profile: profileRows[0] || null, subjectKnowledge });
 }
 
 // Add a learning goal

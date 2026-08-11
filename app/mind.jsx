@@ -44,12 +44,19 @@ export default function Mind({ student, displayName, onBack }) {
   const [goals, setGoals] = useState([]);
   const [goalText, setGoalText] = useState("");
   const [selected, setSelected] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [subjectKnowledge, setSubjectKnowledge] = useState([]);
 
   useEffect(() => {
     if (!student) return;
     fetch(`/api/mind?student=${encodeURIComponent(student)}`)
       .then((r) => r.json())
-      .then((d) => { setConcepts(d.concepts || []); setGoals(d.goals || []); })
+      .then((d) => {
+        setConcepts(d.concepts || []);
+        setGoals(d.goals || []);
+        setProfile(d.profile || null);
+        setSubjectKnowledge(d.subjectKnowledge || []);
+      })
       .catch(() => setConcepts([]));
   }, [student]);
 
@@ -77,6 +84,28 @@ export default function Mind({ student, displayName, onBack }) {
         <h1 className="text-display text-white">Your learning universe</h1>
         <p className="text-white/55 mt-1.5 max-w-lg">Every concept you and your mentor have worked through, connected — click one to see how far you&apos;ve come.</p>
       </Reveal>
+
+      {(profile?.primary_goal || subjectKnowledge.length > 0) && (
+        <Reveal delay={0.05}>
+          <Surface tier={2} className="mt-5 p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            {profile?.primary_goal && (
+              <div>
+                <span className="text-white/45">Your goal — </span>
+                <span className="text-white/85 font-medium">{profile.primary_goal}</span>
+              </div>
+            )}
+            {subjectKnowledge.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {subjectKnowledge.map((s) => (
+                  <span key={s.subject} className="px-2.5 py-1 rounded-full bg-white/5 ring-1 ring-white/15 text-white/70 text-xs">
+                    {s.subject} · {s.level}
+                  </span>
+                ))}
+              </div>
+            )}
+          </Surface>
+        </Reveal>
+      )}
 
       {concepts === null ? (
         <div className="mt-8 text-white/50 text-sm">Loading your mind…</div>

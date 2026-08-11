@@ -90,5 +90,96 @@ export async function GET() {
     )
   `;
 
+  // ===== Mentor intelligence: knowledge level (separate from age/persona)
+  // and a conversationally-captured learner profile =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS subject_knowledge (
+      student TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      level TEXT DEFAULT 'beginner',
+      difficulty INTEGER DEFAULT 2,
+      confidence REAL DEFAULT 0.5,
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (student, subject)
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS learner_profile (
+      student TEXT PRIMARY KEY,
+      primary_goal TEXT,
+      why TEXT,
+      interests TEXT[] DEFAULT '{}',
+      available_time TEXT,
+      learning_style TEXT,
+      preferred_language TEXT,
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+  await sql`ALTER TABLE learner_profile ADD COLUMN IF NOT EXISTS preferred_language TEXT`;
+
+  // ===== Roles: every account is a student by default; parent/teacher
+  // accounts don't have subjects/level, they have relationships instead =====
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'student'`;
+
+  // ===== Parent Copilot: real parent<->student linking via short codes
+  // (no email infrastructure exists, so codes are the honest option) =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS link_codes (
+      code TEXT PRIMARY KEY,
+      student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      expires_at TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS parent_links (
+      id SERIAL PRIMARY KEY,
+      parent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE(parent_id, student_id)
+    )
+  `;
+
+  // ===== Teacher Copilot: real classes, rosters, and AI-generated
+  // assignments — binary completion, no grading/rubric system =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS classes (
+      id SERIAL PRIMARY KEY,
+      teacher_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      subject TEXT,
+      join_code TEXT UNIQUE NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS class_enrollments (
+      class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+      student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      joined_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (class_id, student_id)
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS assignments (
+      id SERIAL PRIMARY KEY,
+      class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      topic TEXT,
+      content TEXT,
+      due_date DATE,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS assignment_completions (
+      assignment_id INTEGER NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+      student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      completed_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (assignment_id, student_id)
+    )
+  `;
+
   return Response.json({ ok: true, message: "Tables ready!" });
 }
