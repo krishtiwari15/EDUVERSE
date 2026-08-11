@@ -319,7 +319,7 @@ export default function Home() {
   // ---------- Auth ----------
   if (authUser === undefined) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <BrandMark className="w-6 h-9 animate-pulse" />
       </div>
@@ -364,7 +364,7 @@ export default function Home() {
     const prevNeed = [0, ...BADGES.map((b) => b.need)][BADGES.findIndex((b) => b === nextBadge)] || 0;
     const pct = nextBadge ? Math.round(((stars - prevNeed) / (nextBadge.need - prevNeed)) * 100) : 100;
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <div className="relative z-10 w-full max-w-md">
           <button onClick={() => { sfx.tap(); setShowBadges(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
@@ -408,7 +408,7 @@ export default function Home() {
   if (building) {
     const previewMentor = { name: cName || "Your buddy" };
     return (
-      <div className="relative min-h-screen p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <div className="relative z-10 max-w-4xl mx-auto py-4">
           <button onClick={() => { sfx.tap(); setBuilding(false); }} aria-label="Back" className="focus-ring flex items-center gap-1.5 text-white/70 hover:text-white mb-4 font-semibold text-sm">
@@ -455,7 +455,7 @@ export default function Home() {
   // ---------- Picker screen ----------
   if (!mentor) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
         <div className="relative z-10 w-full max-w-3xl py-6">
@@ -506,7 +506,7 @@ export default function Home() {
   // ---------- AI Mentor companion, focus session, Obsidian Mind, settings ----------
   if (room === "companion") {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <Companion
           mentor={mentor}
@@ -522,7 +522,7 @@ export default function Home() {
   }
   if (room === "focus") {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app flex items-center justify-center safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <Focus mentor={mentor} muted={muted} onBack={() => { sfx.tap(); setRoom("home"); }} onComplete={() => { celebrate("Session complete!"); addStar(); }} />
       </div>
@@ -530,7 +530,7 @@ export default function Home() {
   }
   if (room === "mind") {
     return (
-      <div className="relative min-h-screen p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <Mind student={student} displayName={displayName} onBack={() => { sfx.tap(); setRoom("home"); }} />
       </div>
@@ -538,7 +538,7 @@ export default function Home() {
   }
   if (room === "settings") {
     return (
-      <div className="relative min-h-screen p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <SettingsScreen student={student} onBack={() => { sfx.tap(); setRoom("home"); }} />
       </div>
@@ -556,7 +556,7 @@ export default function Home() {
       { icon: Award, label: "Progress", desc: `${stars} stars`, onClick: openBadges },
     ];
     return (
-      <div className="relative min-h-screen p-4 sm:p-6 bg-[var(--void)] screen-enter">
+      <div className="relative min-h-app safe-pad bg-[var(--void)] screen-enter">
         <VoidBackdrop />
         <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
         <Toast message={toast} />
@@ -660,11 +660,11 @@ export default function Home() {
   // ---------- IMMERSIVE CHAT ROOM ----------
   const showStarters = messages.length <= 1 && !loading;
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden bg-[var(--void)] screen-enter">
+    <div className="relative min-h-app flex flex-col overflow-hidden bg-[var(--void)] screen-enter">
       <VoidBackdrop />
       <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
       <Toast message={toast} />
-      <header className="relative z-20 flex items-center gap-2 px-3 sm:px-4 py-3">
+      <header className="relative z-20 flex items-center gap-2 safe-x safe-top py-3 shrink-0">
         <IconButton icon={HomeIcon} label="Go home" onClick={() => { sfx.tap(); stopSpeaking(); stopListening(); setRoom("home"); }} />
         <div className="flex-1 text-center min-w-0">
           <div className="text-heading text-white leading-tight truncate">{mentor.name}</div>
@@ -674,7 +674,7 @@ export default function Home() {
         <IconButton icon={Volume2} activeIcon={VolumeX} active={muted} label={muted ? "Unmute voice" : "Mute voice"} aria-pressed={muted} onClick={() => { sfx.tap(); setMuted((v) => { if (!v) stopSpeaking(); return !v; }); }} />
       </header>
 
-      <div className="relative z-10 flex flex-col items-center pt-1 pb-2">
+      <div className="relative z-10 flex flex-col items-center pt-1 pb-2 shrink-0">
         <AIAvatar mentor={mentor} state={speaking ? "speaking" : listening ? "listening" : "idle"} size={140} />
         <div className="mt-1 h-4">
           {speaking ? (
@@ -688,13 +688,13 @@ export default function Home() {
         )}
       </div>
 
-      <div className="relative z-10 flex gap-2 pt-1 pb-2 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center">
+      <div className="relative z-10 flex gap-2 pt-1 pb-2 px-3 overflow-x-auto no-scrollbar justify-start sm:justify-center shrink-0">
         {SUBJECTS.map((s) => (
           <button key={s} onClick={() => switchContext(null, s)} aria-pressed={subject === s} className={`focus-ring px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition ${subject === s ? "bg-white text-[var(--pill-ink)]" : "bg-white/10 text-white ring-1 ring-white/20"}`}>{s}</button>
         ))}
       </div>
 
-      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-2.5 max-w-2xl w-full mx-auto no-scrollbar">
+      <div ref={scrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-2.5 max-w-2xl w-full mx-auto no-scrollbar">
         <AnimatePresence initial={false}>
           {messages.map((m, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -723,7 +723,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className="relative z-10 px-3 sm:px-4 pb-4 pt-1 max-w-2xl w-full mx-auto">
+      <div className="relative z-10 safe-x safe-bottom pt-1 max-w-2xl w-full mx-auto shrink-0">
         <div className="flex items-end gap-2 bg-white/95 rounded-3xl p-2 shadow-2xl">
           <button onClick={() => (listening ? stopListening() : startListening())} aria-label={listening ? "Stop and send" : "Talk"} aria-pressed={listening} className={`focus-ring w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600"}`} title={listening ? "Listening… tap to stop & send" : "Tap and talk"}>
             {listening ? <MicOff size={17} /> : <Mic size={17} />}

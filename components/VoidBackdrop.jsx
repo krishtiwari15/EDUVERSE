@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Shares the CloudFront asset family used elsewhere in onboarding — swap
 // for a self-hosted video before shipping to production.
@@ -18,6 +18,10 @@ export default function VoidBackdrop() {
   const layerARef = useRef(null);
   const layerBRef = useRef(null);
   const state = useRef({ a: 0, aTarget: 0, b: 0, bTarget: 0 });
+  // Skip the video decode on small/mobile screens — battery and data cost
+  // for a purely decorative layer isn't worth it there. The lightweight
+  // parallax glow layers below still run everywhere.
+  const [showVideo] = useState(() => typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true);
 
   useEffect(() => {
     let raf;
@@ -43,13 +47,15 @@ export default function VoidBackdrop() {
 
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-      <video
-        autoPlay muted loop playsInline preload="auto"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: "grayscale(1) brightness(.32) contrast(1.15)" }}
-      >
-        <source src={VIDEO_URL} type="video/mp4" />
-      </video>
+      {showVideo && (
+        <video
+          autoPlay muted loop playsInline preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "grayscale(1) brightness(.32) contrast(1.15)" }}
+        >
+          <source src={VIDEO_URL} type="video/mp4" />
+        </video>
+      )}
       <div className="absolute inset-0 bg-black/55" />
 
       <div

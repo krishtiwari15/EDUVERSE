@@ -53,16 +53,16 @@ export default function Login({ onAuth, initialMode, onBack }) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-app overflow-hidden">
       <AuthPlate />
 
       {onBack && (
-        <button onClick={onBack} aria-label="Back" className="focus-ring absolute z-20 top-5 left-5 sm:top-7 sm:left-7 flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-semibold transition">
+        <button onClick={onBack} aria-label="Back" className="focus-ring absolute z-20 flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-semibold transition" style={{ top: "max(1.25rem, env(safe-area-inset-top))", left: "max(1.25rem, env(safe-area-inset-left))" }}>
           <ArrowLeft size={16} /> Back
         </button>
       )}
 
-      <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
+      <div className="relative z-10 min-h-app grid lg:grid-cols-2">
         {/* Left — the pitch */}
         <div className="hidden lg:flex flex-col justify-center px-16 xl:px-20 py-16">
           <Reveal>
@@ -93,7 +93,7 @@ export default function Login({ onAuth, initialMode, onBack }) {
         </div>
 
         {/* Right — the form */}
-        <div className="flex items-center justify-center p-6 sm:p-10">
+        <div className="flex items-center justify-center safe-pad sm:p-10">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

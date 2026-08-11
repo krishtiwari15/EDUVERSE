@@ -121,6 +121,36 @@ body {
 }
 
 /* ---------------------------------------------------------------- */
+/* Mobile: dynamic viewport height + safe-area-aware spacing so      */
+/* content never sits under a notch/home-indicator or jumps around   */
+/* when a mobile browser's address bar shows/hides.                  */
+/* ---------------------------------------------------------------- */
+.min-h-app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.safe-pad {
+  padding: calc(env(safe-area-inset-top, 0px) + 1rem) calc(env(safe-area-inset-right, 0px) + 1rem)
+    calc(env(safe-area-inset-bottom, 0px) + 1rem) calc(env(safe-area-inset-left, 0px) + 1rem);
+}
+@media (min-width: 640px) {
+  .safe-pad {
+    padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) calc(env(safe-area-inset-right, 0px) + 1.5rem)
+      calc(env(safe-area-inset-bottom, 0px) + 1.5rem) calc(env(safe-area-inset-left, 0px) + 1.5rem);
+  }
+}
+.safe-top {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+}
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+}
+.safe-x {
+  padding-left: calc(env(safe-area-inset-left, 0px) + 0.75rem);
+  padding-right: calc(env(safe-area-inset-right, 0px) + 0.75rem);
+}
+
+/* ---------------------------------------------------------------- */
 /* Respect prefers-reduced-motion globally                          */
 /* ---------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

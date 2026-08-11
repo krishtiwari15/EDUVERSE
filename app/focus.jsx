@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, Play, Pause, Square, Target, Camera } from "lucide-react";
+import { ArrowLeft, Play, Pause, Square, Target, Camera, Award } from "lucide-react";
 import { Button, Surface, ProgressBar } from "@/components/ui";
 import AIAvatar from "@/components/mentor/AIAvatar";
 import CameraPermission from "@/components/mentor/CameraPermission";
@@ -164,7 +164,9 @@ export default function Focus({ mentor, muted, onBack, onComplete }) {
 
         {phase === "done" && (
           <>
-            <div className="text-4xl mb-2">🎉</div>
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+              <Award size={26} className="text-white" strokeWidth={1.75} />
+            </div>
             <p className="text-white text-lg font-semibold">Session complete!</p>
             <p className="text-white/60 text-sm mt-1">{durationMin} focused minutes{goal ? ` on ${goal}` : ""}.</p>
             <Button variant="primary" size="md" onClick={stop} className="w-full mt-5">Start another</Button>

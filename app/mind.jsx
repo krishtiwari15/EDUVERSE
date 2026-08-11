@@ -31,7 +31,8 @@ function buildGraph(concepts, studentLabel) {
       const cy = hy + Math.sin(cAngle) * conceptRadius;
       const id = `c-${c.id}`;
       nodes.push({ id, type: "concept", position: { x: cx, y: cy }, data: { label: c.name, subject: c.subject, mastery: c.mastery, mistakes: c.mistakes, lastReviewed: c.last_reviewed }, draggable: false });
-      edges.push({ id: `${hubId}-${id}`, source: hubId, target: id, style: { stroke: `${c.mastery >= 0.7 ? "#FBBF24" : "#5EEAD4"}55` } });
+      const edgeOpacity = 0.12 + Math.min(1, c.mastery ?? 0) * 0.35;
+      edges.push({ id: `${hubId}-${id}`, source: hubId, target: id, style: { stroke: `rgba(255,255,255,${edgeOpacity})` } });
     });
   });
 
