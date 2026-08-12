@@ -27,7 +27,7 @@ export default function Focus({ mentor, muted, onBack, onComplete }) {
   const lastCheckinRef = useRef(0);
   const notifiedAwayRef = useRef(false);
 
-  const { speak } = useVoiceConversation({ muted });
+  const { speak } = useVoiceConversation({ muted, mentor });
   const presence = useFocusPresence({ cameraEnabled: cameraStage === "on", videoRef, inactiveAfterMs: AWAY_THRESHOLD_MS });
 
   useEffect(() => {

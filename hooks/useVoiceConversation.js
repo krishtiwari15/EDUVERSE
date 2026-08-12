@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { mentorVoiceProfile } from "@/lib/voice";
 
 // The AI Mentor's conversation state machine. One IDLE/LISTENING/THINKING/
 // SPEAKING/INTERRUPTED/ERROR value drives every voice-driven screen so the
@@ -13,11 +14,9 @@ export const ConvState = {
   ERROR: "ERROR",
 };
 
-const VOICE_NAMES = ["Google UK English Female", "Microsoft Aria", "Microsoft Jenny", "Samantha", "Google US English", "Microsoft Zira"];
-
-function pickVoice() {
+function pickVoice(preferredNames = []) {
   const voices = window.speechSynthesis.getVoices();
-  for (const name of VOICE_NAMES) {
+  for (const name of preferredNames) {
     const v = voices.find((vo) => vo.name.includes(name));
     if (v) return v;
   }
@@ -30,7 +29,7 @@ function pickVoice() {
  * onInterim(text) — fired continuously while listening, with the running transcript.
  * onCommit(text)  — fired when a listening turn is done and should be sent.
  */
-export function useVoiceConversation({ muted = false, onInterim, onCommit } = {}) {
+export function useVoiceConversation({ muted = false, mentor, onInterim, onCommit } = {}) {
   const [state, setState] = useState(ConvState.IDLE);
   const [error, setError] = useState("");
   const recognitionRef = useRef(null);
@@ -39,7 +38,9 @@ export function useVoiceConversation({ muted = false, onInterim, onCommit } = {}
   const autoCommitRef = useRef(false);
   const finalTextRef = useRef("");
   const mutedRef = useRef(muted);
+  const mentorRef = useRef(mentor);
   useEffect(() => { mutedRef.current = muted; }, [muted]);
+  useEffect(() => { mentorRef.current = mentor; }, [mentor]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -157,8 +158,9 @@ export function useVoiceConversation({ muted = false, onInterim, onCommit } = {}
     window.speechSynthesis.cancel();
     const clean = text.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, "");
     const u = new SpeechSynthesisUtterance(clean);
-    const v = pickVoice(); if (v) u.voice = v;
-    u.rate = 0.95; u.pitch = 1.1;
+    const profile = mentorVoiceProfile(mentorRef.current);
+    const v = pickVoice(profile.voiceNames); if (v) u.voice = v;
+    u.rate = profile.rate; u.pitch = profile.pitch;
     u.onstart = () => { setState(ConvState.SPEAKING); armBargeIn(); };
     u.onend = () => { stopBargeIn(); setState((s) => (s === ConvState.SPEAKING ? ConvState.IDLE : s)); };
     u.onerror = () => { stopBargeIn(); setState(ConvState.IDLE); };

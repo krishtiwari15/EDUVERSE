@@ -157,6 +157,7 @@ export default function Home() {
 
   const { listening, speaking, speak, stopSpeaking, startListening, stopListening, interrupt, state: convState, error: voiceError } = useVoiceConversation({
     muted,
+    mentor,
     onInterim: (text) => setInput(text),
     onCommit: (text) => sendText(text),
   });

@@ -57,12 +57,12 @@ export default function AIAvatar({ mentor, state = "idle", size = 56, className 
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={avatarUri} alt="" className="w-full h-full select-none pointer-events-none" draggable={false} />
-        {state === "confused" && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--pill)] flex items-center justify-center">
-            <HelpCircle size={11} className="text-[var(--pill-ink)]" strokeWidth={2.5} />
-          </div>
-        )}
       </motion.div>
+      {state === "confused" && (
+        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--pill)] flex items-center justify-center z-10">
+          <HelpCircle size={11} className="text-[var(--pill-ink)]" strokeWidth={2.5} />
+        </div>
+      )}
     </div>
   );
 }
