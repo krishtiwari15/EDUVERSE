@@ -39,6 +39,13 @@ export function useVoiceConversation({ muted = false, mentor, onInterim, onCommi
   const finalTextRef = useRef("");
   const mutedRef = useRef(muted);
   const mentorRef = useRef(mentor);
+  // iOS Safari silently garbage-collects a SpeechSynthesisUtterance that
+  // isn't referenced anywhere outside the function that created it,
+  // cutting speech off after a word or two. Keeping it here — and keeping
+  // the resume-nudge interval below — are both documented WebKit
+  // workarounds, not guesses.
+  const utteranceRef = useRef(null);
+  const resumeTimerRef = useRef(null);
   useEffect(() => { mutedRef.current = muted; }, [muted]);
   useEffect(() => { mentorRef.current = mentor; }, [mentor]);
 
@@ -47,6 +54,34 @@ export function useVoiceConversation({ muted = false, mentor, onInterim, onCommi
       window.speechSynthesis.getVoices();
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
+  }, []);
+
+  // iOS Safari only allows speechSynthesis.speak() to produce audio when
+  // it's part of the same call stack as a real user gesture. By the time
+  // a mentor reply comes back from an `await fetch(...)`, that window has
+  // long closed — Android/Chrome don't enforce this, which is exactly why
+  // it "works on Android but not iPhone." Fix: fire one silent utterance
+  // on the very first tap anywhere on the page to unlock the engine for
+  // the rest of the session, before any async speak() is ever attempted.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    let unlocked = false;
+    const unlock = () => {
+      if (unlocked) return;
+      unlocked = true;
+      try {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+        window.speechSynthesis.cancel();
+      } catch {}
+    };
+    document.addEventListener("touchend", unlock, { passive: true });
+    document.addEventListener("click", unlock);
+    return () => {
+      document.removeEventListener("touchend", unlock);
+      document.removeEventListener("click", unlock);
+    };
   }, []);
 
   // A friendly error clears itself instead of sitting on screen forever.
@@ -65,6 +100,8 @@ export function useVoiceConversation({ muted = false, mentor, onInterim, onCommi
 
   const stopSpeaking = useCallback(() => {
     if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
+    if (resumeTimerRef.current) { clearInterval(resumeTimerRef.current); resumeTimerRef.current = null; }
+    utteranceRef.current = null;
     stopBargeIn();
     setState((s) => (s === ConvState.SPEAKING ? ConvState.IDLE : s));
   }, [stopBargeIn]);
@@ -156,15 +193,36 @@ export function useVoiceConversation({ muted = false, mentor, onInterim, onCommi
   const speak = useCallback((text) => {
     if (mutedRef.current || typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, "");
-    const u = new SpeechSynthesisUtterance(clean);
-    const profile = mentorVoiceProfile(mentorRef.current);
-    const v = pickVoice(profile.voiceNames); if (v) u.voice = v;
-    u.rate = profile.rate; u.pitch = profile.pitch;
-    u.onstart = () => { setState(ConvState.SPEAKING); armBargeIn(); };
-    u.onend = () => { stopBargeIn(); setState((s) => (s === ConvState.SPEAKING ? ConvState.IDLE : s)); };
-    u.onerror = () => { stopBargeIn(); setState(ConvState.IDLE); };
-    window.speechSynthesis.speak(u);
+    if (resumeTimerRef.current) { clearInterval(resumeTimerRef.current); resumeTimerRef.current = null; }
+
+    // A cancel() immediately followed by speak() is flaky on iOS — the new
+    // utterance can get dropped. A short beat between them fixes it.
+    setTimeout(() => {
+      const clean = text.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, "");
+      const u = new SpeechSynthesisUtterance(clean);
+      utteranceRef.current = u; // keep alive — see note above on iOS GC
+      const profile = mentorVoiceProfile(mentorRef.current);
+      const v = pickVoice(profile.voiceNames); if (v) u.voice = v;
+      u.rate = profile.rate; u.pitch = profile.pitch;
+      u.onstart = () => {
+        setState(ConvState.SPEAKING);
+        armBargeIn();
+        // Chrome/WebKit both have a long-standing bug where speech pauses
+        // and never resumes partway through a long utterance.
+        resumeTimerRef.current = setInterval(() => {
+          if (window.speechSynthesis.speaking) window.speechSynthesis.resume();
+        }, 4000);
+      };
+      const finish = () => {
+        if (resumeTimerRef.current) { clearInterval(resumeTimerRef.current); resumeTimerRef.current = null; }
+        utteranceRef.current = null;
+        stopBargeIn();
+        setState((s) => (s === ConvState.SPEAKING ? ConvState.IDLE : s));
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      window.speechSynthesis.speak(u);
+    }, 60);
   }, [armBargeIn, stopBargeIn]);
 
   // The always-visible manual fallback: stop the mentor and start listening,
@@ -177,7 +235,11 @@ export function useVoiceConversation({ muted = false, mentor, onInterim, onCommi
   const setThinking = useCallback(() => setState(ConvState.THINKING), []);
   const setIdle = useCallback(() => setState(ConvState.IDLE), []);
 
-  useEffect(() => () => { stopBargeIn(); recognitionRef.current?.stop(); }, [stopBargeIn]);
+  useEffect(() => () => {
+    stopBargeIn();
+    recognitionRef.current?.stop();
+    if (resumeTimerRef.current) clearInterval(resumeTimerRef.current);
+  }, [stopBargeIn]);
 
   return {
     state, error,
