@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-// VP8 WebM as the primary source (small, works everywhere except Safari),
-// plus an H.264 MP4 fallback — Safari (iOS and macOS) has never supported
-// VP8 in <video>, full stop, regardless of viewport or autoplay settings.
-// Without this second source the element is just permanently blank on
-// every iPhone.
-const VIDEO_URL_WEBM = "https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/nexo-hero-bg-video.webm";
-const VIDEO_URL_MP4 = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260613_180732_a54afbf6-b30d-470e-861f-669871f09f67.mp4";
+// A single H.264 MP4 — deliberately not a WebM/MP4 dual-source. A dual
+// source lets each browser pick whichever it supports, which meant Safari
+// (no VP8 support) and Chrome were literally showing two different videos.
+// H.264 MP4 is the one format every browser (desktop and mobile, iOS
+// included) can decode, so this keeps the background identical everywhere.
+const VIDEO_URL = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260613_180732_a54afbf6-b30d-470e-861f-669871f09f67.mp4";
 const FADE_SEC = 0.5;
 
 const clamp = (min, max, v) => Math.min(max, Math.max(min, v));
@@ -108,8 +107,7 @@ export default function VoidBackdrop() {
         className="void-video-zoom absolute inset-0 w-full h-full object-cover"
         style={{ opacity: 0 }}
       >
-        <source src={VIDEO_URL_WEBM} type="video/webm" />
-        <source src={VIDEO_URL_MP4} type="video/mp4" />
+        <source src={VIDEO_URL} type="video/mp4" />
       </video>
       <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
 

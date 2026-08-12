@@ -125,6 +125,14 @@ export default function Home() {
   const audioCtxRef = useRef(null);
   const [cName, setCName] = useState("");
   const [cPersona, setCPersona] = useState("");
+  // Debounced so the mentor-builder's live-preview avatar doesn't
+  // regenerate into a completely different illustrated face on every
+  // single keystroke while typing a name — it settles once typing pauses.
+  const [cNameSettled, setCNameSettled] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setCNameSettled(cName), 400);
+    return () => clearTimeout(t);
+  }, [cName]);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -436,7 +444,7 @@ export default function Home() {
 
   // ---------- Mentor Studio (builder) ----------
   if (building) {
-    const previewMentor = { name: cName || "Your buddy" };
+    const previewMentor = { name: cNameSettled || "Your buddy" };
     return (
       <div className="relative min-h-app safe-pad screen-enter">
         <VoidBackdrop />
@@ -462,7 +470,7 @@ export default function Home() {
             {/* Live preview panel */}
             <Surface tier={3} className="p-6 sm:p-8 order-1 md:order-2 md:sticky md:top-6">
               <p className="text-eyebrow mb-4">Live preview</p>
-              <motion.div key={cName} initial={{ scale: 0.94, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center text-center">
+              <motion.div key={cNameSettled} initial={{ scale: 0.94, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center text-center">
                 <AIAvatar mentor={previewMentor} size={88} />
                 <div className="text-heading text-white mt-4">{cName || "Your buddy"}</div>
                 <p className="text-eyebrow mt-1">Custom Buddy · Obsidian Mind</p>

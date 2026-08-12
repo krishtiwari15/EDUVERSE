@@ -121,6 +121,13 @@ export async function GET() {
   // accounts don't have subjects/level, they have relationships instead =====
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'student'`;
 
+  // ===== Password recovery: no email infrastructure exists (same reason
+  // Parent Copilot uses codes instead of email invites), so "forgot
+  // password" is a security question set at signup / in Settings, verified
+  // before allowing a reset — not an email reset link. =====
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS security_question TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS security_answer_hash TEXT`;
+
   // ===== Parent Copilot: real parent<->student linking via short codes
   // (no email infrastructure exists, so codes are the honest option) =====
   await sql`

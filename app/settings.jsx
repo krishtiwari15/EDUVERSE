@@ -1,7 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Camera, Mic, MessageSquare, BrainCircuit, Sparkles, BellRing, Trash2, UserPlus, School, Copy, Check, ArrowRight } from "lucide-react";
+import { ArrowLeft, Camera, Mic, MessageSquare, BrainCircuit, Sparkles, BellRing, Trash2, UserPlus, School, Copy, Check, ArrowRight, ShieldQuestion } from "lucide-react";
 import { Button, Surface, Reveal } from "@/components/ui";
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What city were you born in?",
+  "What was your childhood nickname?",
+  "What was the name of your first school?",
+  "What's your favorite teacher's name?",
+];
 
 function Toggle({ on, onChange, label }) {
   return (
@@ -36,11 +44,39 @@ export default function Settings({ student, onBack }) {
   const [classCode, setClassCode] = useState("");
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinMessage, setJoinMessage] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState(null); // null = loading, "" = unset
+  const [editingQuestion, setEditingQuestion] = useState(false);
+  const [newQuestion, setNewQuestion] = useState(SECURITY_QUESTIONS[0]);
+  const [newAnswer, setNewAnswer] = useState("");
+  const [savingQuestion, setSavingQuestion] = useState(false);
+  const [questionSaved, setQuestionSaved] = useState(false);
 
   useEffect(() => {
     if (!student) return;
     fetch(`/api/settings?student=${encodeURIComponent(student)}`).then((r) => r.json()).then((d) => setSettings(d.settings)).catch(() => setSettings({}));
+    fetch("/api/auth/security-question").then((r) => r.json()).then((d) => setSecurityQuestion(d.question || "")).catch(() => setSecurityQuestion(""));
   }, [student]);
+
+  async function saveSecurityQuestion(e) {
+    e.preventDefault();
+    if (savingQuestion || !newAnswer.trim()) return;
+    setSavingQuestion(true);
+    try {
+      const res = await fetch("/api/auth/security-question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: newQuestion, answer: newAnswer }),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        setSecurityQuestion(newQuestion);
+        setEditingQuestion(false);
+        setNewAnswer("");
+        setQuestionSaved(true);
+        setTimeout(() => setQuestionSaved(false), 2500);
+      }
+    } catch {} finally { setSavingQuestion(false); }
+  }
 
   function update(key, value) {
     const next = { ...settings, [key]: value };
@@ -117,6 +153,42 @@ export default function Settings({ student, onBack }) {
           ))}
         </Surface>
       )}
+
+      <Surface tier={2} className="mt-4 p-4">
+        <div className="flex items-start gap-3">
+          <ShieldQuestion size={18} className="text-white/60 mt-0.5 shrink-0" strokeWidth={1.75} />
+          <div className="flex-1">
+            <div className="text-white text-sm font-semibold">Password recovery</div>
+            <p className="text-white/45 text-xs mt-0.5 leading-relaxed">
+              EduVerse doesn&apos;t send recovery emails — this security question is what lets you get back in if you forget your password.
+            </p>
+            {securityQuestion === null ? null : editingQuestion ? (
+              <form onSubmit={saveSecurityQuestion} className="mt-2.5 space-y-2">
+                <select value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} className="focus-ring w-full px-3.5 py-2 rounded-lg bg-white/95 text-slate-800 text-sm font-medium">
+                  {SECURITY_QUESTIONS.map((q) => <option key={q} value={q}>{q}</option>)}
+                </select>
+                <div className="flex gap-2">
+                  <input value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} placeholder="Your answer" className="focus-ring flex-1 px-3.5 py-2 rounded-lg bg-white/95 text-slate-800 text-sm placeholder:text-slate-400" required />
+                  <Button type="submit" variant="ghost" size="sm" disabled={savingQuestion || !newAnswer.trim()}>{savingQuestion ? "…" : "Save"}</Button>
+                </div>
+                <button type="button" onClick={() => setEditingQuestion(false)} className="focus-ring text-white/40 hover:text-white text-xs transition">Cancel</button>
+              </form>
+            ) : (
+              <div className="mt-2">
+                {securityQuestion ? (
+                  <p className="text-white/60 text-xs">Current: <span className="text-white/85">{securityQuestion}</span></p>
+                ) : (
+                  <p className="text-amber-200/80 text-xs">Not set yet — you won&apos;t be able to recover your account if you forget your password.</p>
+                )}
+                {questionSaved && <p className="text-white text-xs mt-1 font-semibold">Saved.</p>}
+                <Button variant="ghost" size="sm" onClick={() => { setEditingQuestion(true); setNewQuestion(securityQuestion || SECURITY_QUESTIONS[0]); }} className="mt-2 !px-0">
+                  {securityQuestion ? "Change it" : "Set a security question"}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Surface>
 
       <Surface tier={2} className="mt-4 p-4">
         <div className="flex items-start gap-3">
