@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dicebear/adventurer": "^9.4.2",
     "@dicebear/collection": "^9.4.2",
     "@dicebear/core": "^9.4.3",
     "@lottiefiles/dotlottie-react": "^0.19.13",

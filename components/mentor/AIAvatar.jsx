@@ -1,7 +1,8 @@
 "use client";
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import { HelpCircle } from "lucide-react";
-import { mentorInitial } from "@/lib/avatar";
+import { mentorAvatarUri } from "@/lib/avatar";
 
 // Deterministic warm hue per mentor name — keeps every avatar in the same
 // amber/orange/rose family as the ambient video backdrop instead of
@@ -13,15 +14,15 @@ function warmHue(name) {
   return 5 + (h % 50); // 5–55: red through amber/gold
 }
 
-// The one mentor-avatar component used everywhere in the app — a monogram
-// tile driven by a single `state` prop for idle/listening/thinking/
-// speaking/happy/confused/encouraging/celebrating. Each mentor gets a
-// warm, glowing gradient tied to their name so they read clearly against
-// the motion backdrop instead of disappearing into it.
+// The one mentor-avatar component used everywhere in the app — a real,
+// locally-generated illustrated face (DiceBear "adventurer", seeded on the
+// mentor's name so it's stable across sessions) inside a warm glowing
+// ring, driven by a single `state` prop for idle/listening/thinking/
+// speaking/happy/confused/encouraging/celebrating.
 export default function AIAvatar({ mentor, state = "idle", size = 56, className = "" }) {
-  const letter = mentorInitial(mentor?.name);
   const ringInset = -Math.max(4, size * 0.07);
   const hue = warmHue(mentor?.name);
+  const avatarUri = useMemo(() => mentorAvatarUri(mentor?.name), [mentor?.name]);
 
   return (
     <div className={`relative flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
@@ -43,7 +44,7 @@ export default function AIAvatar({ mentor, state = "idle", size = 56, className 
       )}
 
       <motion.div
-        className="relative rounded-full flex items-center justify-center"
+        className="relative rounded-full flex items-center justify-center overflow-hidden"
         style={{
           width: size, height: size,
           background: `radial-gradient(circle at 32% 28%, hsla(${hue},85%,62%,0.55), hsla(${hue},75%,42%,0.25) 70%)`,
@@ -54,7 +55,8 @@ export default function AIAvatar({ mentor, state = "idle", size = 56, className 
         animate={state === "happy" || state === "celebrating" ? { scale: [1, 1.07, 1] } : { scale: 1 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="font-bold text-white select-none" style={{ fontSize: size * 0.4, textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{letter}</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatarUri} alt="" className="w-full h-full select-none pointer-events-none" draggable={false} />
         {state === "confused" && (
           <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--pill)] flex items-center justify-center">
             <HelpCircle size={11} className="text-[var(--pill-ink)]" strokeWidth={2.5} />
