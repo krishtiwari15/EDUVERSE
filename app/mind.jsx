@@ -81,7 +81,7 @@ export default function Mind({ student, displayName, onBack }) {
 
       <Reveal>
         <p className="text-eyebrow mb-1.5">Obsidian Mind</p>
-        <h1 className="text-display text-white">Your learning universe</h1>
+        <h1 className="text-display text-white">Your learning <span className="text-shimmer">universe</span></h1>
         <p className="text-white/55 mt-1.5 max-w-lg">Every concept you and your mentor have worked through, connected — click one to see how far you&apos;ve come.</p>
       </Reveal>
 
@@ -163,7 +163,7 @@ export default function Mind({ student, displayName, onBack }) {
           ))}
         </div>
         <form onSubmit={addGoal} className="flex gap-2">
-          <input value={goalText} onChange={(e) => setGoalText(e.target.value)} placeholder="e.g. Get comfortable with fractions" className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm placeholder:text-slate-400" />
+          <input value={goalText} onChange={(e) => setGoalText(e.target.value)} placeholder="e.g. Get comfortable with fractions" className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm placeholder:text-slate-400" />
           <Button type="submit" variant="primary" size="sm" icon={Plus}>Add</Button>
         </form>
       </Surface>

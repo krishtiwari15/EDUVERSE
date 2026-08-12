@@ -14,7 +14,7 @@ export default function MicrophoneButton({ listening, onClick, size = "md", disa
       aria-label={listening ? "Stop and send" : "Talk to your mentor"}
       aria-pressed={listening}
       title={listening ? "Listening… tap to stop & send" : "Tap and talk"}
-      className={`focus-ring ${s.box} rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40 ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-slate-200 text-slate-600 bg-white"} ${className}`}
+      className={`focus-ring ${s.box} rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40 ${listening ? "bg-red-500 text-white animate-pulse scale-110" : "ring-1 ring-white/15 text-white/70 bg-white/10"} ${className}`}
     >
       {listening ? <MicOff size={s.icon} /> : <Mic size={s.icon} />}
     </button>

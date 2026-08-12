@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Home as HomeIcon, ArrowLeft, LogOut, Award, Lock, Mic, MicOff, Volume2, VolumeX,
-  Send, Sparkles, PencilLine, Backpack, Users, Compass,
+  Send, Sparkles, PencilLine, Backpack, Users, Compass, Gamepad2,
   BarChart3, Play, Brain, Settings as SettingsIcon, Star,
 } from "lucide-react";
 import Landing from "./landing";
@@ -15,10 +15,12 @@ import Mind from "./mind";
 import SettingsScreen from "./settings";
 import ParentDashboard from "./parent";
 import TeacherDashboard from "./teacher";
+import Games from "./games";
 import { Button, Surface, Badge, ProgressBar, Section, Reveal, RevealGroup, RevealItem } from "@/components/ui";
 import AIAvatar from "@/components/mentor/AIAvatar";
 import BrandMark from "@/components/BrandMark";
 import VoidBackdrop from "@/components/VoidBackdrop";
+import QuoteRotator from "@/components/QuoteRotator";
 import { useVoiceConversation } from "@/hooks/useVoiceConversation";
 
 const MENTORS = {
@@ -27,6 +29,8 @@ const MENTORS = {
   case: { name: "Pip", role: "Stargazer", tagline: "Let's slow down and think it through, together." },
 };
 const SUBJECTS = ["General", "Math", "Science", "English", "Coding", "Languages"];
+
+const PICKER_HIGHLIGHTS = ["AI Tutor", "AI Mentor Companion", "Knowledge Games", "Obsidian Mind"];
 
 const BADGES = [
   { need: 1, name: "First Star" },
@@ -54,11 +58,11 @@ function BadgePopup({ badge, onClose }) {
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-6" onClick={onClose}>
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="glass-card-elevated p-8 text-center max-w-xs" onClick={(e) => e.stopPropagation()}>
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-          <Award size={28} className="text-white" strokeWidth={1.75} />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--surface-2)] border border-[var(--border-glass-strong)] flex items-center justify-center">
+          <Award size={28} className="text-[var(--ink)]" strokeWidth={1.75} />
         </div>
         <div className="text-eyebrow">New badge unlocked!</div>
-        <div className="text-display text-white mt-1">{badge.name}</div>
+        <div className="text-display text-[var(--ink)] mt-1">{badge.name}</div>
         <Button variant="primary" size="md" onClick={onClose} className="mt-5 w-full">Awesome!</Button>
       </motion.div>
     </div>
@@ -68,7 +72,7 @@ function BadgePopup({ badge, onClose }) {
 function Toast({ message }) {
   if (!message) return null;
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 px-5 py-2.5 rounded-full bg-white text-[var(--pill-ink)] text-sm font-semibold shadow-lg"
+    <div className="fixed bottom-6 left-1/2 z-50 px-5 py-2.5 rounded-full bg-[var(--pill)] text-[var(--pill-ink)] text-sm font-semibold shadow-lg"
       style={{ animation: "toastIn 0.4s cubic-bezier(.16,1,.3,1) both" }}>
       {message}
     </div>
@@ -77,8 +81,8 @@ function Toast({ message }) {
 
 function StarChip({ stars, onClick }) {
   return (
-    <button onClick={onClick} aria-label={`${stars} stars earned — view progress`} className="focus-ring flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)] bg-white/10 ring-1 ring-white/20 text-white text-sm font-bold active:scale-95 transition shrink-0">
-      <Star size={13} className="fill-white text-white" /> {stars}
+    <button onClick={onClick} aria-label={`${stars} stars earned — view progress`} className="focus-ring flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)] bg-[var(--surface-2)] ring-1 ring-[var(--border-glass-strong)] text-[var(--ink)] text-sm font-bold active:scale-95 transition shrink-0">
+      <Star size={13} className="fill-[var(--ink)] text-[var(--ink)]" /> {stars}
     </button>
   );
 }
@@ -86,8 +90,8 @@ function StarChip({ stars, onClick }) {
 function IconButton({ icon: Icon, active, activeIcon: ActiveIcon, label, className = "", ...props }) {
   const Shown = active && ActiveIcon ? ActiveIcon : Icon;
   return (
-    <button aria-label={label} title={label} className={`focus-ring w-11 h-11 rounded-xl ring-1 ring-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center shrink-0 transition ${className}`} {...props}>
-      <Shown size={18} strokeWidth={2} className="text-white" />
+    <button aria-label={label} title={label} className={`focus-ring w-11 h-11 rounded-xl ring-1 ring-[var(--border-glass-strong)] bg-[var(--surface-1)] hover:bg-[var(--surface-2)] flex items-center justify-center shrink-0 transition ${className}`} {...props}>
+      <Shown size={18} strokeWidth={2} className="text-[var(--ink)]" />
     </button>
   );
 }
@@ -262,18 +266,18 @@ export default function Home() {
     setRoom("home");
   }
 
-  function enterRoom(nm, subjectOverride) {
+  function enterRoom(nm, subjectOverride, customNote) {
     sfx.tap();
     const activeSubject = subjectOverride || subject;
     if (subjectOverride) setSubject(subjectOverride);
     setMode(nm);
     setRoom("chat");
     setMessages([]);
-    const note = nm === "Quiz" ? `Let's start a ${activeSubject} quiz! Ask me the first question.`
+    const note = customNote || (nm === "Quiz" ? `Let's start a ${activeSubject} quiz! Ask me the first question.`
       : nm === "Homework" ? `Can you help me with my homework?`
       : nm === "Companion" ? `Hey, I'm here to chat and check in.`
       : nm === "Opportunities" ? `I'd like to explore opportunities that might fit me.`
-      : `I want to learn ${activeSubject}.`;
+      : `I want to learn ${activeSubject}.`);
     sendText(note, []);
   }
 
@@ -446,10 +450,10 @@ export default function Home() {
             {/* Config panel */}
             <Surface tier={2} className="p-5 sm:p-6 order-2 md:order-1">
               <label className="text-eyebrow">Name</label>
-              <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/90 text-slate-800 text-base font-medium placeholder:text-slate-400" />
+              <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Zappy" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/95 text-slate-800 text-base font-medium placeholder:text-slate-400" />
 
               <label className="text-eyebrow">Personality</label>
-              <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={4} placeholder="e.g. A funny robot who loves space and tells silly jokes!" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/90 text-slate-800 text-sm resize-none placeholder:text-slate-400" />
+              <textarea value={cPersona} onChange={(e) => setCPersona(e.target.value)} rows={4} placeholder="e.g. A funny robot who loves space and tells silly jokes!" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/95 text-slate-800 text-sm resize-none placeholder:text-slate-400" />
 
               <Button variant="primary" size="md" onClick={createMentor} disabled={!cName.trim()} className="w-full">Create my buddy</Button>
             </Surface>
@@ -480,50 +484,80 @@ export default function Home() {
   // ---------- Picker screen ----------
   if (!mentor) {
     return (
-      <div className="relative min-h-app flex items-center justify-center safe-pad screen-enter">
+      <div className="relative min-h-app flex flex-col safe-pad screen-enter overflow-x-hidden">
         <VoidBackdrop />
+        <div className="fixed inset-0 z-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent pointer-events-none" aria-hidden="true" />
         <BadgePopup badge={newBadge} onClose={closeBadgePopup} />
-        <div className="relative z-10 w-full max-w-3xl py-6">
-          <div className="flex justify-between items-center mb-4">
-            <button onClick={logout} className="focus-ring flex items-center gap-1.5 text-white/50 hover:text-white text-xs font-semibold transition">
-              <LogOut size={13} /> Log out
-            </button>
-            <StarChip stars={stars} onClick={openBadges} />
-          </div>
-          <Reveal className="text-center">
-            <p className="text-eyebrow mb-2">{displayName ? `Hi ${displayName}` : "Welcome"}</p>
-            <h1 className="text-hero text-white" style={{ fontSize: "clamp(2rem,5vw,3.25rem)" }}>Pick your buddy</h1>
-            <p className="text-white/50 mt-3">Every buddy shares one caring Obsidian Mind — pick the one that fits your mood.</p>
-          </Reveal>
-          <RevealGroup className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8" stagger={0.06}>
-            {Object.entries(MENTORS).map(([key, m]) => (
-              <RevealItem key={key}>
-                <button onClick={() => start(m)} className="focus-ring w-full text-left glass-card p-4 sm:p-5 hover:bg-white/10 hover:-translate-y-1 active:scale-95 transition-all duration-200">
-                  <div className="mb-3"><AIAvatar mentor={m} size={56} /></div>
-                  <div className="text-heading text-white text-base">{m.name}</div>
-                  <div className="text-eyebrow mt-0.5">{m.role}</div>
-                  <p className="text-xs sm:text-sm text-white/60 mt-1.5 leading-snug">{m.tagline}</p>
-                </button>
-              </RevealItem>
-            ))}
-            <RevealItem>
-              <button onClick={() => { sfx.tap(); setBuilding(true); }} className="focus-ring w-full h-full flex flex-col items-center justify-center bg-white/5 border-2 border-dashed border-white/20 hover:border-white/35 rounded-[var(--radius-lg)] p-4 sm:p-5 active:scale-95 transition-all min-h-[9.5rem]">
-                <Sparkles size={26} className="text-white/70 mb-2" strokeWidth={1.75} />
-                <div className="text-heading text-white text-sm text-center">Create your own</div>
+        <div className="relative z-10 flex-1 flex items-center justify-center">
+          <div className="w-full max-w-3xl py-4 sm:py-6">
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={logout} className="focus-ring flex items-center gap-1.5 text-gray-500 hover:text-white text-xs font-semibold transition-colors duration-300">
+                <LogOut size={13} /> Log out
               </button>
-            </RevealItem>
-            {savedMentors.map((m, i) => (
-              <RevealItem key={"saved" + i}>
-                <button onClick={() => start(m)} className="focus-ring w-full text-left glass-card p-4 sm:p-5 hover:bg-white/10 hover:-translate-y-1 active:scale-95 transition-all duration-200">
-                  <div className="mb-3"><AIAvatar mentor={m} size={56} /></div>
-                  <div className="text-heading text-white text-base">{m.name}</div>
-                  <div className="text-eyebrow mt-0.5">Your buddy</div>
-                  <p className="text-xs sm:text-sm text-white/60 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
+              <StarChip stars={stars} onClick={openBadges} />
+            </div>
+            <Reveal className="text-center">
+              <p className="text-eyebrow mb-2 text-gray-300">{displayName ? `Hi ${displayName}` : "Welcome"}</p>
+              <h1 className="text-hero" style={{ fontSize: "clamp(2.1rem,8vw,3.75rem)" }}>
+                <span className="text-white">Pick your </span>
+                <span className="text-shimmer">buddy</span>
+              </h1>
+              <p className="text-gray-300 mt-3 text-sm sm:text-base max-w-md mx-auto">Every buddy shares one caring Obsidian Mind — pick the one that fits your mood.</p>
+            </Reveal>
+            <RevealGroup className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-6 sm:mt-8" stagger={0.06}>
+              {Object.entries(MENTORS).map(([key, m]) => (
+                <RevealItem key={key}>
+                  <button onClick={() => start(m)} className="focus-ring w-full text-left rounded-xl backdrop-blur-xl bg-gradient-to-br from-orange-500/10 via-white/5 to-rose-500/5 border border-orange-200/10 hover:border-orange-200/30 hover:from-orange-500/15 hover:-translate-y-1 active:scale-95 transition-all duration-300 p-3.5 sm:p-5">
+                    <div className="mb-2.5 sm:mb-3"><AIAvatar mentor={m} size={48} /></div>
+                    <div className="text-heading text-white text-sm sm:text-base">{m.name}</div>
+                    <div className="text-eyebrow mt-0.5 text-gray-300">{m.role}</div>
+                    <p className="hidden sm:block text-xs sm:text-sm text-gray-400 mt-1.5 leading-snug">{m.tagline}</p>
+                  </button>
+                </RevealItem>
+              ))}
+              <RevealItem>
+                <button onClick={() => { sfx.tap(); setBuilding(true); }} className="focus-ring w-full h-full flex flex-col items-center justify-center backdrop-blur-xl bg-gradient-to-br from-orange-500/10 via-white/5 to-rose-500/5 border-2 border-dashed border-orange-200/15 hover:border-orange-200/40 hover:from-orange-500/15 rounded-xl p-3.5 sm:p-5 active:scale-95 transition-all duration-300 min-h-[8rem] sm:min-h-[9.5rem]">
+                  <Sparkles size={24} className="text-orange-200/80 mb-2" strokeWidth={1.75} />
+                  <div className="text-heading text-white text-xs sm:text-sm text-center">Create your own</div>
                 </button>
               </RevealItem>
-            ))}
-          </RevealGroup>
+              {savedMentors.map((m, i) => (
+                <RevealItem key={"saved" + i}>
+                  <button onClick={() => start(m)} className="focus-ring w-full text-left rounded-xl backdrop-blur-xl bg-gradient-to-br from-orange-500/10 via-white/5 to-rose-500/5 border border-orange-200/10 hover:border-orange-200/30 hover:from-orange-500/15 hover:-translate-y-1 active:scale-95 transition-all duration-300 p-3.5 sm:p-5">
+                    <div className="mb-2.5 sm:mb-3"><AIAvatar mentor={m} size={48} /></div>
+                    <div className="text-heading text-white text-sm sm:text-base">{m.name}</div>
+                    <div className="text-eyebrow mt-0.5 text-gray-300">Your buddy</div>
+                    <p className="hidden sm:block text-xs sm:text-sm text-gray-400 mt-1.5 leading-snug">{m.personality?.slice(0, 36) || "Made just for you."}</p>
+                  </button>
+                </RevealItem>
+              ))}
+            </RevealGroup>
+          </div>
         </div>
+
+        <motion.footer
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          className="liquid-glass relative z-10 w-full max-w-3xl mx-auto rounded-3xl p-5 sm:p-6 md:p-8 text-gray-300 mt-6 md:mt-10 mb-4 md:mb-10"
+        >
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 text-center sm:text-left">
+            <div>
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <BrandMark className="w-5 h-7" />
+                <span className="text-white text-lg font-medium tracking-tight">EDUVERSE</span>
+              </div>
+              <p className="text-sm leading-relaxed max-w-sm mt-2">
+                One caring Obsidian Mind, shared across every buddy — teaching, quizzing, and remembering, built to make learning feel like discovery.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:max-w-xs">
+              {PICKER_HIGHLIGHTS.map((h) => (
+                <span key={h} className="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/5 ring-1 ring-white/10 text-gray-300">{h}</span>
+              ))}
+            </div>
+          </div>
+        </motion.footer>
       </div>
     );
   }
@@ -569,6 +603,18 @@ export default function Home() {
       </div>
     );
   }
+  if (room === "games") {
+    return (
+      <div className="relative min-h-app safe-pad screen-enter">
+        <VoidBackdrop />
+        <Games
+          student={student}
+          onBack={() => { sfx.tap(); setRoom("home"); }}
+          onAskMentor={(message) => { sfx.tap(); enterRoom("Companion", null, message); }}
+        />
+      </div>
+    );
+  }
 
   // ---------- STUDENT DASHBOARD ----------
   if (room === "home") {
@@ -580,6 +626,7 @@ export default function Home() {
       { icon: Users, label: "My Buddy", desc: "Switch or create", onClick: () => { sfx.tap(); setMentor(null); } },
       { icon: Award, label: "Progress", desc: `${stars} stars`, onClick: openBadges },
       { icon: Compass, label: "Opportunities", desc: "Explore paths", onClick: () => enterRoom("Opportunities") },
+      { icon: Gamepad2, label: "Games", desc: "Play & learn", onClick: () => { sfx.tap(); setRoom("games"); } },
     ];
     return (
       <div className="relative min-h-app safe-pad screen-enter">
@@ -599,7 +646,8 @@ export default function Home() {
 
           <Reveal>
             <p className="text-eyebrow mb-1.5">{greeting()}, {displayName || "explorer"}</p>
-            <h1 className="text-display text-white">Your next mission</h1>
+            <h1 className="text-display text-white">Your next <span className="text-shimmer">mission</span></h1>
+            <QuoteRotator className="mt-3" />
           </Reveal>
 
           {/* Hero mission card */}
@@ -618,10 +666,10 @@ export default function Home() {
           </Reveal>
 
           {/* Quick actions */}
-          <RevealGroup className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4" stagger={0.05}>
+          <RevealGroup className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mt-4" stagger={0.05}>
             {quickActions.map((a) => (
               <RevealItem key={a.label}>
-                <button onClick={a.onClick} aria-label={`${a.label} — ${a.desc}`} className="focus-ring w-full glass-card p-4 flex flex-col items-center gap-2 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95 transition-all text-center">
+                <button onClick={a.onClick} aria-label={`${a.label} — ${a.desc}`} className="focus-ring w-full rounded-[var(--radius-lg)] backdrop-blur-xl bg-gradient-to-br from-orange-500/10 via-black/40 to-rose-500/10 border border-orange-200/10 shadow-sm p-3.5 sm:p-4 flex flex-col items-center gap-2 hover:border-orange-200/30 hover:brightness-125 hover:-translate-y-0.5 active:scale-95 transition-all text-center">
                   <a.icon size={20} className="text-white/80" strokeWidth={1.75} />
                   <div>
                     <div className="text-white text-sm font-semibold">{a.label}</div>
@@ -675,7 +723,7 @@ export default function Home() {
                   onChange={(e) => setLearnInput(e.target.value)}
                   placeholder="Or type anything — 'how money works', 'cooking', 'the universe'…"
                   aria-label="What do you want to learn?"
-                  className="focus-ring flex-1 px-4 py-2.5 rounded-[var(--radius-pill)] bg-white/90 text-slate-800 text-sm placeholder:text-slate-400"
+                  className="focus-ring flex-1 px-4 py-2.5 rounded-[var(--radius-pill)] bg-white/95 text-slate-800 text-sm placeholder:text-slate-400"
                 />
                 <button type="submit" disabled={!learnInput.trim()} aria-label="Start learning" className="focus-ring w-10 h-10 rounded-full flex items-center justify-center bg-white text-[var(--pill-ink)] disabled:opacity-40 shrink-0 transition active:scale-95">
                   <Send size={15} strokeWidth={2.25} />

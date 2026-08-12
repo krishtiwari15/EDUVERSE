@@ -1,10 +1,14 @@
-import { Manrope } from "next/font/google";
+import { Manrope, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import "@xyflow/react/dist/style.css";
 
-// Single type family across the whole app — restrained silver/white
-// Manrope, weight and size carry hierarchy instead of a second display face.
+// Manrope remains the type family for the pre-login flow (landing/login/
+// preferences — see .app-light in globals.css for the scoped exception).
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+// Instrument Serif (display) + Inter (body) — used only inside the
+// in-app ".app-light" scope, not the onboarding flow above.
+const instrumentSerif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-instrument-serif" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata = {
   title: "EduVerse — Your AI Learning Universe",
@@ -23,7 +27,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={manrope.variable} style={{ fontFamily: "var(--font-body), sans-serif" }}>
+      <body className={`${manrope.variable} ${instrumentSerif.variable} ${inter.variable}`} style={{ fontFamily: "var(--font-body), sans-serif" }}>
         {children}
       </body>
     </html>

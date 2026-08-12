@@ -181,5 +181,40 @@ export async function GET() {
     )
   `;
 
+  // ===== Knowledge Games: session/progress bookkeeping. Skill signals
+  // (mastery, mistakes) flow into the SAME Obsidian Mind tables above —
+  // concepts/student_concept/learning_events — not a parallel system. =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS game_progress (
+      student TEXT NOT NULL,
+      game_id TEXT NOT NULL,
+      difficulty INTEGER DEFAULT 2,
+      sessions_played INTEGER DEFAULT 0,
+      best_score INTEGER DEFAULT 0,
+      last_played_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (student, game_id)
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS game_sessions (
+      id SERIAL PRIMARY KEY,
+      student TEXT NOT NULL,
+      game_id TEXT NOT NULL,
+      difficulty INTEGER,
+      score INTEGER DEFAULT 0,
+      accuracy REAL,
+      duration_sec INTEGER,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS game_achievements (
+      student TEXT NOT NULL,
+      key TEXT NOT NULL,
+      earned_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (student, key)
+    )
+  `;
+
   return Response.json({ ok: true, message: "Tables ready!" });
 }

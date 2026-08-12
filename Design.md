@@ -17,6 +17,7 @@ Product areas (existing today marked ✅, roadmap marked 🔜):
 - ✅ Parent Copilot — real parent accounts, code-based linking to a student (no email invites, no fabricated family data), plain-language progress summaries generated from real Obsidian Mind data
 - ✅ Teacher Copilot — real teacher accounts, classes with join codes, AI-generated assignments (binary complete/not-complete, not a full gradebook)
 - ✅ Opportunities — an AI conversation mode exploring paths/competitions/programs grounded in the learner's real profile; deliberately never states specific deadlines/amounts as verified fact
+- ✅ Knowledge Games — 10 mini-games (Sudoku, Math Duel, Logic Detective, Memory Matrix, Word Quest, Geography Explorer, Science Lab, Code Runner, Finance Simulator, Research Hunt) that build reasoning/math/science/language/finance/research skills, feeding the same Obsidian Mind the AI Tutor reads from and handing off to it via "Ask Mentor"
 - 🔜 Formal Progress & Analytics
 
 Roadmap items appear in the product as clearly labeled "coming soon" moments, never as fabricated data pretending to be real.

@@ -38,6 +38,7 @@
   --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.4);
 
   --font-body: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-body);
 }
 
 @theme inline {
@@ -53,28 +54,75 @@ body {
 }
 
 /* ---------------------------------------------------------------- */
+/* .app-light — scoped light-theme override for every in-app screen  */
+/* (dashboard, tutor, companion, focus, mind, settings, games,       */
+/* parent/teacher). Landing, login, and preferences stay on the      */
+/* dark :root palette above by simply never receiving this class.    */
+/* Same token names, same components — only the values change, so    */
+/* every shared component (Button/Surface/Badge/...) picks this up   */
+/* automatically wherever this class wraps it.                       */
+/* ---------------------------------------------------------------- */
+.app-light {
+  --background: #ffffff;
+  --foreground: #050505;
+
+  --ink: #050505;
+  --muted: #6f6f6f;
+  --faint: #9a9a9a;
+  --void: #ffffff;
+
+  --surface-1: rgba(5, 5, 5, 0.035);
+  --surface-2: rgba(5, 5, 5, 0.05);
+  --surface-3: rgba(5, 5, 5, 0.08);
+  --border-glass: rgba(5, 5, 5, 0.12);
+  --border-glass-strong: rgba(5, 5, 5, 0.22);
+
+  --pill: #050505;
+  --pill-ink: #ffffff;
+
+  --focus-ring: 0 0 0 3px rgba(5, 5, 5, 0.35);
+
+  --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-instrument-serif), Georgia, serif;
+
+  background: var(--void);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+/* ---------------------------------------------------------------- */
 /* Typography scale — one family, weight and size carry hierarchy   */
 /* ---------------------------------------------------------------- */
 .text-hero {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.05;
   font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
 }
 .text-display {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
   font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
 }
 .text-heading {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
   font-size: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+}
+/* Instrument Serif only ships a regular cut — drop the synthetic-bold
+   weight so app-light headings render as the real typeface, not a
+   browser-faked bold. */
+.app-light .text-hero,
+.app-light .text-display,
+.app-light .text-heading {
+  font-weight: 400;
 }
 .text-eyebrow {
   font-family: var(--font-body);
@@ -90,19 +138,65 @@ body {
 }
 
 /* ---------------------------------------------------------------- */
-/* Surfaces — flat, hairline-bordered cards. No blur.                */
-/* (Class names kept as glass-card/-elevated for continuity with the */
-/* Surface component's tier map — they're flat now, not glass.)      */
+/* Surfaces — glassmorphic, blurred, hairline-bordered cards so the  */
+/* ambient motion backdrop reads through instead of being hidden     */
+/* behind a flat tile.                                                */
 /* ---------------------------------------------------------------- */
 .glass-card {
   background: var(--surface-2);
+  background-image: linear-gradient(135deg, rgba(255, 138, 66, 0.07), rgba(255, 255, 255, 0.03) 55%, rgba(255, 82, 82, 0.05));
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: background-color 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
 }
 .glass-card-elevated {
   background: var(--surface-3);
+  background-image: linear-gradient(135deg, rgba(255, 138, 66, 0.1), rgba(255, 255, 255, 0.04) 55%, rgba(255, 82, 82, 0.07));
   border: 1px solid var(--border-glass-strong);
   border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background-color 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
+}
+a.glass-card:hover, button.glass-card:hover,
+.glass-card[role="button"]:hover {
+  filter: brightness(1.15);
+}
+
+/* One deliberate exception to the flat-surface rule above: a true blurred
+   "liquid glass" treatment, used only where a video/motion background sits
+   directly behind the surface (e.g. the mentor picker's footer). */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .focus-ring {
@@ -191,6 +285,37 @@ body {
 @keyframes voidDriftB {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(-5%, -6%) scale(1.05); }
+}
+/* A slow, barely-perceptible Ken Burns drift on the ambient backdrop video
+   — pure CSS so it runs independent of the JS-driven opacity fade. */
+@keyframes voidVideoZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+.void-video-zoom {
+  animation: voidVideoZoom 40s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .void-video-zoom { animation: none; }
+}
+
+/* Warm gradient accent text with a slow shimmer — used sparingly, on one
+   word per headline, to echo the ambient video's fire tones instead of a
+   flat white/hue-less accent. */
+@keyframes textShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.text-shimmer {
+  background-image: linear-gradient(100deg, #ffcb7a, #ff7a45 45%, #ff4d4d 65%, #ffcb7a);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: textShimmer 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer { animation: none; background-position: 30% 50%; }
 }
 @keyframes holeSpinA {
   from { transform: rotate(0deg); }

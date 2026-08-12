@@ -68,7 +68,7 @@ export default function ParentDashboard({ user, onLogout }) {
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Enter the code they gave you"
                 maxLength={6}
-                className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm tracking-widest font-semibold placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400"
+                className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm tracking-widest font-semibold placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400"
               />
               <Button type="submit" variant="primary" size="sm" icon={ArrowRight} iconPosition="right" disabled={linking || !code.trim()}>
                 {linking ? "Linking…" : "Link"}

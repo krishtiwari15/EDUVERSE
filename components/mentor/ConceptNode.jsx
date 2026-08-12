@@ -11,18 +11,18 @@ export default function ConceptNode({ data }) {
 
   if (isHub) {
     return (
-      <div className="glass-card-elevated px-5 py-3 text-center" style={{ borderColor: "rgba(255,255,255,.4)" }}>
+      <div className="glass-card-elevated px-5 py-3 text-center" style={{ borderColor: "var(--border-glass-strong)" }}>
         <Handle type="source" position={Position.Bottom} isConnectable={false} style={{ opacity: 0 }} />
-        <div className="text-heading text-white text-sm">{label}</div>
+        <div className="text-heading text-[var(--ink)] text-sm">{label}</div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card px-3.5 py-2.5 text-center min-w-[8rem]" style={{ boxShadow: `0 0 0 1.5px rgba(255,255,255,${ringOpacity}) inset` }}>
+    <div className="glass-card px-3.5 py-2.5 text-center min-w-[8rem]" style={{ boxShadow: `0 0 0 1.5px rgba(5,5,5,${ringOpacity}) inset` }}>
       <Handle type="target" position={Position.Top} isConnectable={false} style={{ opacity: 0 }} />
-      <div className="text-white text-xs font-semibold leading-tight">{label}</div>
-      <div className="text-[10px] mt-1 font-medium text-white/55">{subject} · {pct}% mastery</div>
+      <div className="text-[var(--ink)] text-xs font-semibold leading-tight">{label}</div>
+      <div className="text-[10px] mt-1 font-medium text-[var(--muted)]">{subject} · {pct}% mastery</div>
     </div>
   );
 }

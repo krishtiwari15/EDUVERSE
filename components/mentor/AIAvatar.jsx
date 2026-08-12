@@ -3,27 +3,38 @@ import { motion } from "motion/react";
 import { HelpCircle } from "lucide-react";
 import { mentorInitial } from "@/lib/avatar";
 
-// The one mentor-avatar component used everywhere in the app — a flat
-// monogram tile (no illustrated character, no per-mentor color) driven by
-// a single `state` prop for idle/listening/thinking/speaking/happy/
-// confused/encouraging/celebrating. Matches the v2 "Cinematic Void" system:
-// hierarchy and feedback come from motion and monochrome rings, not hue.
+// Deterministic warm hue per mentor name — keeps every avatar in the same
+// amber/orange/rose family as the ambient video backdrop instead of
+// clashing cool tones, while still giving each mentor a distinct identity.
+function warmHue(name) {
+  const str = name || "?";
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 1000;
+  return 5 + (h % 50); // 5–55: red through amber/gold
+}
+
+// The one mentor-avatar component used everywhere in the app — a monogram
+// tile driven by a single `state` prop for idle/listening/thinking/
+// speaking/happy/confused/encouraging/celebrating. Each mentor gets a
+// warm, glowing gradient tied to their name so they read clearly against
+// the motion backdrop instead of disappearing into it.
 export default function AIAvatar({ mentor, state = "idle", size = 56, className = "" }) {
   const letter = mentorInitial(mentor?.name);
   const ringInset = -Math.max(4, size * 0.07);
+  const hue = warmHue(mentor?.name);
 
   return (
     <div className={`relative flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
       {state === "speaking" && [0, 1, 2].map((r) => (
-        <div key={r} className="absolute rounded-full border border-white/35" style={{ inset: ringInset, animation: `ring 1.6s ease-out ${r * 0.5}s infinite` }} />
+        <div key={r} className="absolute rounded-full border border-[var(--border-glass-strong)]" style={{ inset: ringInset, animation: `ring 1.6s ease-out ${r * 0.5}s infinite` }} />
       ))}
       {state === "listening" && (
-        <div className="absolute rounded-full border border-white/45" style={{ inset: ringInset, animation: "ring 1.8s ease-out infinite" }} />
+        <div className="absolute rounded-full border border-[var(--border-glass-strong)]" style={{ inset: ringInset, animation: "ring 1.8s ease-out infinite" }} />
       )}
       {state === "thinking" && (
         <div className="absolute" style={{ width: size * 1.15, height: size * 1.15, animation: "orbitSpin 2.4s linear infinite" }}>
           {[0, 120, 240].map((deg) => (
-            <div key={deg} className="absolute rounded-full bg-white/70" style={{
+            <div key={deg} className="absolute rounded-full bg-[var(--muted)]" style={{
               width: 4, height: 4, top: "2%", left: "50%",
               transform: `translateX(-50%) rotate(${deg}deg)`, transformOrigin: `50% ${size * 0.55}px`,
             }} />
@@ -32,18 +43,21 @@ export default function AIAvatar({ mentor, state = "idle", size = 56, className 
       )}
 
       <motion.div
-        className="relative rounded-full flex items-center justify-center border border-white/15"
+        className="relative rounded-full flex items-center justify-center"
         style={{
-          width: size, height: size, background: "rgba(255,255,255,.06)",
+          width: size, height: size,
+          background: `radial-gradient(circle at 32% 28%, hsla(${hue},85%,62%,0.55), hsla(${hue},75%,42%,0.25) 70%)`,
+          border: `1.5px solid hsla(${hue},80%,70%,0.55)`,
+          boxShadow: `0 0 ${size * 0.35}px hsla(${hue},85%,55%,0.35)`,
           animation: state === "confused" ? "tiltConfused 1.4s ease-in-out infinite" : undefined,
         }}
         animate={state === "happy" || state === "celebrating" ? { scale: [1, 1.07, 1] } : { scale: 1 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="font-semibold text-white select-none" style={{ fontSize: size * 0.4 }}>{letter}</span>
+        <span className="font-bold text-white select-none" style={{ fontSize: size * 0.4, textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{letter}</span>
         {state === "confused" && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center">
-            <HelpCircle size={11} className="text-black" strokeWidth={2.5} />
+          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--pill)] flex items-center justify-center">
+            <HelpCircle size={11} className="text-[var(--pill-ink)]" strokeWidth={2.5} />
           </div>
         )}
       </motion.div>

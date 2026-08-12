@@ -3,8 +3,8 @@ import { motion } from "motion/react";
 
 const VARIANTS = {
   primary: "text-[var(--pill-ink)] bg-[var(--pill)] hover:opacity-90",
-  glass: "text-white bg-white/5 border border-white/15 hover:bg-white/10",
-  ghost: "text-white/70 hover:text-white",
+  glass: "text-[var(--ink)] bg-[var(--surface-1)] border border-[var(--border-glass)] hover:bg-[var(--surface-2)]",
+  ghost: "text-[var(--muted)] hover:text-[var(--ink)]",
 };
 
 const SIZES = {

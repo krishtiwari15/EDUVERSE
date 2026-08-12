@@ -1,7 +1,7 @@
 const TONES = {
-  solid: "bg-white text-[var(--pill-ink)]",
-  outline: "bg-white/5 text-white ring-1 ring-white/25",
-  neutral: "bg-white/10 text-white/70 ring-1 ring-white/15",
+  solid: "bg-[var(--pill)] text-[var(--pill-ink)]",
+  outline: "bg-[var(--surface-1)] text-[var(--ink)] ring-1 ring-[var(--border-glass-strong)]",
+  neutral: "bg-[var(--surface-2)] text-[var(--muted)] ring-1 ring-[var(--border-glass)]",
 };
 
 export default function Badge({ tone = "neutral", icon: Icon, className = "", children }) {

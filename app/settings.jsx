@@ -97,7 +97,7 @@ export default function Settings({ student, onBack }) {
 
       <Reveal>
         <p className="text-eyebrow mb-1.5">Privacy & Mentor</p>
-        <h1 className="text-display text-white">Your controls</h1>
+        <h1 className="text-display text-white">Your <span className="text-shimmer">controls</span></h1>
         <p className="text-white/55 mt-1.5">Everything here is off by default except what&apos;s needed to chat. Change your mind anytime.</p>
       </Reveal>
 
@@ -148,7 +148,7 @@ export default function Settings({ student, onBack }) {
             <div className="text-white text-sm font-semibold">Join a class</div>
             <p className="text-white/45 text-xs mt-0.5 leading-relaxed mb-2.5">Enter the code your teacher shared to see their assignments on your dashboard.</p>
             <form onSubmit={joinClass} className="flex gap-2">
-              <input value={classCode} onChange={(e) => setClassCode(e.target.value.toUpperCase())} placeholder="Class code" maxLength={6} className="focus-ring flex-1 px-3.5 py-2 rounded-lg bg-white/90 text-slate-800 text-sm tracking-widest font-semibold placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400" />
+              <input value={classCode} onChange={(e) => setClassCode(e.target.value.toUpperCase())} placeholder="Class code" maxLength={6} className="focus-ring flex-1 px-3.5 py-2 rounded-lg bg-white/95 text-slate-800 text-sm tracking-widest font-semibold placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400" />
               <Button type="submit" variant="ghost" size="sm" icon={ArrowRight} iconPosition="right" disabled={joinBusy || !classCode.trim()}>{joinBusy ? "…" : "Join"}</Button>
             </form>
             {joinMessage && <p className="text-white/60 text-xs mt-2">{joinMessage}</p>}

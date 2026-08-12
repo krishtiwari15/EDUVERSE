@@ -24,7 +24,7 @@ export default function Companion({ mentor, displayName, onBack, onTalk, onType,
         <AIAvatar mentor={mentor} state="encouraging" size={148} />
         <p className="text-eyebrow mt-5">Your AI Mentor</p>
         <h1 className="text-display text-white mt-1">
-          Hey{displayName ? `, ${displayName}` : ""}! I&apos;m {mentor.name}.
+          Hey{displayName ? `, ${displayName}` : ""}! I&apos;m <span className="text-shimmer">{mentor.name}</span>.
         </h1>
         <p className="text-white/60 mt-2 max-w-sm">
           I&apos;m here whenever you&apos;re ready — to talk something through, study together, or just check in.

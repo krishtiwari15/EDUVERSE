@@ -39,8 +39,8 @@ function CreateClassForm({ onCreated }) {
     <Surface tier={2} className="p-5">
       <p className="text-eyebrow mb-3">Create a class</p>
       <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Class name, e.g. Period 3 Algebra" className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm placeholder:text-slate-400" />
-        <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject (optional)" className="focus-ring sm:w-48 px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm placeholder:text-slate-400" />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Class name, e.g. Period 3 Algebra" className="focus-ring flex-1 px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm placeholder:text-slate-400" />
+        <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject (optional)" className="focus-ring sm:w-48 px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm placeholder:text-slate-400" />
         <Button type="submit" variant="primary" size="sm" icon={Plus} disabled={busy || !name.trim()}>{busy ? "Creating…" : "Create"}</Button>
       </form>
       {newCode && (
@@ -103,10 +103,10 @@ function ClassDetail({ classId, onBack }) {
         <Surface tier={2} className="mt-5 p-5">
           <p className="text-eyebrow mb-3">Create an assignment</p>
           <form onSubmit={createAssignment} className="flex flex-col gap-2.5">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title, e.g. Fractions practice" className="focus-ring px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm placeholder:text-slate-400" />
-            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={3} placeholder="Describe the topic and goal — the mentor will write the actual assignment for you." className="focus-ring px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm resize-none placeholder:text-slate-400" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title, e.g. Fractions practice" className="focus-ring px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm placeholder:text-slate-400" />
+            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={3} placeholder="Describe the topic and goal — the mentor will write the actual assignment for you." className="focus-ring px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm resize-none placeholder:text-slate-400" />
             <div className="flex items-center gap-2">
-              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="focus-ring px-4 py-2.5 rounded-xl bg-white/90 text-slate-800 text-sm" />
+              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="focus-ring px-4 py-2.5 rounded-xl bg-white/95 text-slate-800 text-sm" />
               <Button type="submit" variant="primary" size="sm" icon={ArrowRight} iconPosition="right" disabled={creating || !title.trim() || !topic.trim()} className="ml-auto">
                 {creating ? "Generating…" : "Generate & post"}
               </Button>

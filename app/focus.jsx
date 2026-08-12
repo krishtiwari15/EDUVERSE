@@ -117,14 +117,14 @@ export default function Focus({ mentor, muted, onBack, onComplete }) {
 
       <div className="flex flex-col items-center text-center">
         <AIAvatar mentor={mentor} state={phase === "done" ? "celebrating" : phase === "running" ? "encouraging" : "idle"} size={128} />
-        <h1 className="text-display text-white mt-4">Focus Session</h1>
+        <h1 className="text-display text-white mt-4">Focus <span className="text-shimmer">Session</span></h1>
       </div>
 
       <Surface tier={3} className="p-6 mt-5 text-center">
         {phase === "setup" && (
           <>
             <label className="text-eyebrow text-white/50 flex items-center justify-center gap-1.5"><Target size={12} /> What are we focusing on?</label>
-            <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="e.g. Finish algebra worksheet" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/90 text-slate-800 text-sm text-center placeholder:text-slate-400" />
+            <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="e.g. Finish algebra worksheet" className="focus-ring w-full mt-2 mb-5 px-4 py-3 rounded-xl bg-white/95 text-slate-800 text-sm text-center placeholder:text-slate-400" />
             <div className="flex justify-center gap-2 mb-5">
               {DURATIONS.map((d) => (
                 <button key={d} onClick={() => { setDurationMin(d); setRemainingSec(d * 60); }} aria-pressed={durationMin === d} className={`focus-ring px-4 py-2 rounded-xl text-sm font-semibold transition ${durationMin === d ? "bg-white text-[var(--pill-ink)]" : "bg-white/10 text-white/70 ring-1 ring-white/20"}`}>{d} min</button>
