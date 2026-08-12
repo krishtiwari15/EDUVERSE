@@ -128,6 +128,20 @@ export async function GET() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS security_question TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS security_answer_hash TEXT`;
 
+  // ===== Password recovery via emailed one-time code — works even for
+  // accounts with no security question set, since owning the inbox is
+  // itself the proof of identity. =====
+  await sql`
+    CREATE TABLE IF NOT EXISTS password_reset_otps (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      code_hash TEXT NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+
   // ===== Parent Copilot: real parent<->student linking via short codes
   // (no email infrastructure exists, so codes are the honest option) =====
   await sql`

@@ -14,7 +14,8 @@ export async function POST(req) {
   if (!EMAIL_RE.test(cleanEmail)) return Response.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   if (!password || password.length < 6) return Response.json({ ok: false, error: "Password must be at least 6 characters." }, { status: 400 });
   if (!cleanName) return Response.json({ ok: false, error: "Enter a name." }, { status: 400 });
-  if (!cleanQuestion || !cleanAnswer) return Response.json({ ok: false, error: "Set a security question and answer so you can recover your account later." }, { status: 400 });
+  // Security question is optional at signup — "forgot password" recovers
+  // by emailing a one-time code by default, which needs no prior setup.
   const cleanLevel = LEVELS.includes(level) ? level : "Kid";
   const cleanRole = ROLES.includes(role) ? role : "student";
 
@@ -24,7 +25,7 @@ export async function POST(req) {
 
   const rows = await db`
     INSERT INTO users (email, password_hash, name, level, role, security_question, security_answer_hash)
-    VALUES (${cleanEmail}, ${hashPassword(password)}, ${cleanName}, ${cleanLevel}, ${cleanRole}, ${cleanQuestion}, ${hashAnswer(cleanAnswer)})
+    VALUES (${cleanEmail}, ${hashPassword(password)}, ${cleanName}, ${cleanLevel}, ${cleanRole}, ${cleanQuestion || null}, ${cleanAnswer ? hashAnswer(cleanAnswer) : null})
     RETURNING id, email, name, level, subjects, role
   `;
   await createSession(db, rows[0].id);

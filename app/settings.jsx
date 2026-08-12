@@ -158,9 +158,9 @@ export default function Settings({ student, onBack }) {
         <div className="flex items-start gap-3">
           <ShieldQuestion size={18} className="text-white/60 mt-0.5 shrink-0" strokeWidth={1.75} />
           <div className="flex-1">
-            <div className="text-white text-sm font-semibold">Password recovery</div>
+            <div className="text-white text-sm font-semibold">Backup security question</div>
             <p className="text-white/45 text-xs mt-0.5 leading-relaxed">
-              EduVerse doesn&apos;t send recovery emails — this security question is what lets you get back in if you forget your password.
+              &ldquo;Forgot password?&rdquo; on the login screen emails you a one-time code by default. This question is an optional second way to prove it&apos;s you — not required.
             </p>
             {securityQuestion === null ? null : editingQuestion ? (
               <form onSubmit={saveSecurityQuestion} className="mt-2.5 space-y-2">
@@ -178,7 +178,7 @@ export default function Settings({ student, onBack }) {
                 {securityQuestion ? (
                   <p className="text-white/60 text-xs">Current: <span className="text-white/85">{securityQuestion}</span></p>
                 ) : (
-                  <p className="text-amber-200/80 text-xs">Not set yet — you won&apos;t be able to recover your account if you forget your password.</p>
+                  <p className="text-white/50 text-xs">Not set yet — optional, you can still recover your account by email.</p>
                 )}
                 {questionSaved && <p className="text-white text-xs mt-1 font-semibold">Saved.</p>}
                 <Button variant="ghost" size="sm" onClick={() => { setEditingQuestion(true); setNewQuestion(securityQuestion || SECURITY_QUESTIONS[0]); }} className="mt-2 !px-0">
